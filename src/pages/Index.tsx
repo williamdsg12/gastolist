@@ -8,12 +8,14 @@ import { Contas } from '@/components/Contas';
 import { Configuracoes } from '@/components/Configuracoes';
 import { Metas } from '@/components/Metas';
 import { Perfil } from '@/components/Perfil';
+import { Historico } from '@/components/Historico';
+import { Notificacoes } from '@/components/Notificacoes';
 import { PinLockScreen } from '@/components/PinLockScreen';
 import { Wallet, Settings, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-type Tab = 'dashboard' | 'entradas' | 'gastos' | 'contas' | 'metas' | 'perfil' | 'config';
+import type { Tab } from '@/components/BottomNav';
 
 const tabTitles: Record<Tab, string> = {
   dashboard: 'Resumo Mensal',
@@ -22,6 +24,7 @@ const tabTitles: Record<Tab, string> = {
   contas: 'Contas a Pagar',
   metas: 'Metas Financeiras',
   perfil: 'Perfil Individual',
+  historico: 'Histórico Anual',
   config: 'Configurações',
 };
 
@@ -78,7 +81,8 @@ const Index = () => {
                   <p className="text-xs text-muted-foreground">{tabTitles[activeTab]}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Notificacoes />
                 <Button
                   variant="ghost"
                   size="icon"
@@ -112,6 +116,7 @@ const Index = () => {
           {activeTab === 'contas' && <Contas />}
           {activeTab === 'metas' && <Metas />}
           {activeTab === 'perfil' && <Perfil />}
+          {activeTab === 'historico' && <Historico />}
           {activeTab === 'config' && <Configuracoes />}
         </main>
 
