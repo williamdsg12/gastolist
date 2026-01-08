@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MonthFilter } from '@/components/MonthFilter';
-import { CATEGORIAS_GASTO } from '@/types/finance';
 import { Plus, Trash2, Target, TrendingUp, TrendingDown, PiggyBank, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
@@ -19,7 +18,8 @@ const formatCurrency = (value: number) => {
 };
 
 export function Metas() {
-  const { getMetasFiltradas, addMeta, deleteMeta, getProgressoMeta } = useFinance();
+  const { getMetasFiltradas, addMeta, deleteMeta, getProgressoMeta, getCategoriasGasto } = useFinance();
+  const categoriasGasto = getCategoriasGasto();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     nome: '',
@@ -162,7 +162,7 @@ export function Metas() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Todas as categorias</SelectItem>
-                    {CATEGORIAS_GASTO.map((cat) => (
+                    {categoriasGasto.map((cat) => (
                       <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                     ))}
                   </SelectContent>

@@ -9,12 +9,13 @@ import { Configuracoes } from '@/components/Configuracoes';
 import { Metas } from '@/components/Metas';
 import { Perfil } from '@/components/Perfil';
 import { Historico } from '@/components/Historico';
+import { ResumoSemanal } from '@/components/ResumoSemanal';
 import { Notificacoes } from '@/components/Notificacoes';
+import { GerenciarCategorias } from '@/components/GerenciarCategorias';
 import { PinLockScreen } from '@/components/PinLockScreen';
-import { Wallet, Settings, Receipt } from 'lucide-react';
+import { Wallet, Settings, Receipt, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { Tab } from '@/components/BottomNav';
 
 const tabTitles: Record<Tab, string> = {
@@ -83,6 +84,21 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-1">
                 <Notificacoes />
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground">
+                      <Calendar className="w-5 h-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+                    <SheetHeader>
+                      <SheetTitle>Resumo Semanal</SheetTitle>
+                    </SheetHeader>
+                    <div className="pt-4">
+                      <ResumoSemanal />
+                    </div>
+                  </SheetContent>
+                </Sheet>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -91,6 +107,14 @@ const Index = () => {
                 >
                   <Receipt className="w-5 h-5" />
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={activeTab === 'perfil' ? 'text-bills' : 'text-muted-foreground'}
+                  onClick={() => setActiveTab('perfil')}
+                >
+                  <User className="w-5 h-5" />
+                </Button>
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button variant="ghost" size="icon" className="text-muted-foreground">
@@ -98,7 +122,8 @@ const Index = () => {
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-                    <div className="pt-6">
+                    <div className="pt-6 space-y-6">
+                      <GerenciarCategorias />
                       <Configuracoes />
                     </div>
                   </SheetContent>
