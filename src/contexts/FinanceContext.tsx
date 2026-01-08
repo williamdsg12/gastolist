@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { Entrada, Gasto, Conta, Meta, ResumoMensal, ResumoPessoa, Responsavel, MESES, CATEGORIAS_ENTRADA, CATEGORIAS_GASTO } from '@/types/finance';
+import { User } from '@supabase/supabase-js';
 
 interface CategoriaPersonalizada {
   id: string;
@@ -9,6 +11,8 @@ interface CategoriaPersonalizada {
 }
 
 interface FinanceContextType {
+  user: User | null;
+  isLoading: boolean;
   entradas: Entrada[];
   gastos: Gasto[];
   contas: Conta[];
@@ -44,176 +48,59 @@ interface FinanceContextType {
   getProgressoMeta: (meta: Meta) => { atual: number; percentual: number };
   getCategoriasEntrada: () => string[];
   getCategoriasGasto: () => string[];
+  signOut: () => void;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
-
-const generateId = () => Math.random().toString(36).substring(2, 9);
 
 const getCurrentMonth = () => MESES[new Date().getMonth()];
 const getCurrentYear = () => new Date().getFullYear();
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
-  const [entradas, setEntradas] = useState<Entrada[]>(() => {
-    const saved = localStorage.getItem('entradas');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const supabaseData = useSupabaseData();
   
-  const [gastos, setGastos] = useState<Gasto[]>(() => {
-    const saved = localStorage.getItem('gastos');
-    return saved ? JSON.parse(saved) : [];
-  });
-  
-  const [contas, setContas] = useState<Conta[]>(() => {
-    const saved = localStorage.getItem('contas');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [metas, setMetas] = useState<Meta[]>(() => {
-    const saved = localStorage.getItem('metas');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [categoriasPersonalizadas, setCategoriasPersonalizadas] = useState<CategoriaPersonalizada[]>(() => {
-    const saved = localStorage.getItem('categorias_personalizadas');
-    return saved ? JSON.parse(saved) : [];
-  });
-
   const [mesSelecionado, setMesSelecionado] = useState(getCurrentMonth());
   const [anoSelecionado, setAnoSelecionado] = useState(getCurrentYear());
   const [responsavelFiltro, setResponsavelFiltro] = useState<Responsavel>('Todos');
 
-  useEffect(() => {
-    localStorage.setItem('entradas', JSON.stringify(entradas));
-  }, [entradas]);
-
-  useEffect(() => {
-    localStorage.setItem('gastos', JSON.stringify(gastos));
-  }, [gastos]);
-
-  useEffect(() => {
-    localStorage.setItem('contas', JSON.stringify(contas));
-  }, [contas]);
-
-  useEffect(() => {
-    localStorage.setItem('metas', JSON.stringify(metas));
-  }, [metas]);
-
-  useEffect(() => {
-    localStorage.setItem('categorias_personalizadas', JSON.stringify(categoriasPersonalizadas));
-  }, [categoriasPersonalizadas]);
-
   const getMesAnoKey = () => `${mesSelecionado}-${anoSelecionado}`;
 
   const getCategoriasEntrada = () => {
-    const personalizadas = categoriasPersonalizadas
+    const personalizadas = supabaseData.categoriasPersonalizadas
       .filter(c => c.tipo === 'entrada')
       .map(c => c.nome);
     return [...CATEGORIAS_ENTRADA, ...personalizadas];
   };
 
   const getCategoriasGasto = () => {
-    const personalizadas = categoriasPersonalizadas
+    const personalizadas = supabaseData.categoriasPersonalizadas
       .filter(c => c.tipo === 'gasto')
       .map(c => c.nome);
     return [...CATEGORIAS_GASTO, ...personalizadas];
   };
 
   const addEntrada = (entrada: Omit<Entrada, 'id' | 'mes'>) => {
-    const newEntrada: Entrada = {
-      ...entrada,
-      id: generateId(),
-      mes: getMesAnoKey(),
-    };
-    setEntradas(prev => [...prev, newEntrada]);
+    supabaseData.addEntrada(entrada, getMesAnoKey());
   };
 
   const addGasto = (gasto: Omit<Gasto, 'id' | 'mes'>) => {
-    const newGasto: Gasto = {
-      ...gasto,
-      id: generateId(),
-      mes: getMesAnoKey(),
-    };
-    setGastos(prev => [...prev, newGasto]);
+    supabaseData.addGasto(gasto, getMesAnoKey());
   };
 
   const addConta = (conta: Omit<Conta, 'id' | 'mes'>) => {
-    const newConta: Conta = {
-      ...conta,
-      id: generateId(),
-      mes: getMesAnoKey(),
-    };
-    setContas(prev => [...prev, newConta]);
+    supabaseData.addConta(conta, getMesAnoKey());
   };
 
   const addMeta = (meta: Omit<Meta, 'id' | 'mes'>) => {
-    const newMeta: Meta = {
-      ...meta,
-      id: generateId(),
-      mes: getMesAnoKey(),
-    };
-    setMetas(prev => [...prev, newMeta]);
+    supabaseData.addMeta(meta, getMesAnoKey());
   };
 
   const addCategoriaPersonalizada = (cat: Omit<CategoriaPersonalizada, 'id'>) => {
-    const newCat: CategoriaPersonalizada = {
-      ...cat,
-      id: generateId(),
-    };
-    setCategoriasPersonalizadas(prev => [...prev, newCat]);
-  };
-
-  const updateEntrada = (id: string, data: Partial<Entrada>) => {
-    setEntradas(prev => prev.map(e => e.id === id ? { ...e, ...data } : e));
-  };
-
-  const updateGasto = (id: string, data: Partial<Gasto>) => {
-    setGastos(prev => prev.map(g => g.id === id ? { ...g, ...data } : g));
-  };
-
-  const updateConta = (id: string, data: Partial<Conta>) => {
-    setContas(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
-  };
-
-  const updateMeta = (id: string, data: Partial<Meta>) => {
-    setMetas(prev => prev.map(m => m.id === id ? { ...m, ...data } : m));
-  };
-
-  const deleteEntrada = (id: string) => {
-    setEntradas(prev => prev.filter(e => e.id !== id));
-  };
-
-  const deleteGasto = (id: string) => {
-    setGastos(prev => prev.filter(g => g.id !== id));
-  };
-
-  const deleteConta = (id: string) => {
-    setContas(prev => prev.filter(c => c.id !== id));
-  };
-
-  const deleteMeta = (id: string) => {
-    setMetas(prev => prev.filter(m => m.id !== id));
-  };
-
-  const deleteCategoriaPersonalizada = (id: string) => {
-    setCategoriasPersonalizadas(prev => prev.filter(c => c.id !== id));
-  };
-
-  const toggleContaPaga = (id: string) => {
-    setContas(prev => prev.map(c => {
-      if (c.id === id) {
-        return {
-          ...c,
-          pago: !c.pago,
-          dataPagamento: !c.pago ? new Date().toISOString().split('T')[0] : undefined
-        };
-      }
-      return c;
-    }));
+    supabaseData.addCategoriaPersonalizada(cat);
   };
 
   const getEntradasFiltradas = () => {
-    return entradas.filter(e => {
+    return supabaseData.entradas.filter(e => {
       const matchMes = e.mes === getMesAnoKey();
       const matchResponsavel = responsavelFiltro === 'Todos' || e.responsavel === responsavelFiltro;
       return matchMes && matchResponsavel;
@@ -221,7 +108,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const getGastosFiltrados = () => {
-    return gastos.filter(g => {
+    return supabaseData.gastos.filter(g => {
       const matchMes = g.mes === getMesAnoKey();
       const matchResponsavel = responsavelFiltro === 'Todos' || g.responsavel === responsavelFiltro;
       return matchMes && matchResponsavel;
@@ -229,7 +116,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const getContasFiltradas = () => {
-    return contas.filter(c => {
+    return supabaseData.contas.filter(c => {
       const matchMes = c.mes === getMesAnoKey();
       const matchResponsavel = responsavelFiltro === 'Todos' || c.responsavel === responsavelFiltro;
       return matchMes && matchResponsavel;
@@ -237,7 +124,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const getMetasFiltradas = () => {
-    return metas.filter(m => {
+    return supabaseData.metas.filter(m => {
       const matchMes = m.mes === getMesAnoKey();
       const matchResponsavel = responsavelFiltro === 'Todos' || m.responsavel === 'Todos' || m.responsavel === responsavelFiltro;
       return matchMes && matchResponsavel;
@@ -248,8 +135,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const mesKey = meta.mes;
     
     if (meta.tipo === 'economia') {
-      const entradasMes = entradas.filter(e => e.mes === mesKey && (meta.responsavel === 'Todos' || e.responsavel === meta.responsavel));
-      const gastosMes = gastos.filter(g => g.mes === mesKey && (meta.responsavel === 'Todos' || g.responsavel === meta.responsavel));
+      const entradasMes = supabaseData.entradas.filter(e => e.mes === mesKey && (meta.responsavel === 'Todos' || e.responsavel === meta.responsavel));
+      const gastosMes = supabaseData.gastos.filter(g => g.mes === mesKey && (meta.responsavel === 'Todos' || g.responsavel === meta.responsavel));
       const totalEntradas = entradasMes.reduce((s, e) => s + e.valor, 0);
       const totalGastos = gastosMes.reduce((s, g) => s + g.valor, 0);
       const economia = totalEntradas - totalGastos;
@@ -258,7 +145,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         percentual: meta.valorMeta > 0 ? Math.min((economia / meta.valorMeta) * 100, 100) : 0
       };
     } else if (meta.tipo === 'limite_gasto') {
-      const gastosMes = gastos.filter(g => {
+      const gastosMes = supabaseData.gastos.filter(g => {
         const matchMes = g.mes === mesKey;
         const matchResponsavel = meta.responsavel === 'Todos' || g.responsavel === meta.responsavel;
         const matchCategoria = !meta.categoria || g.categoria === meta.categoria;
@@ -270,7 +157,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         percentual: meta.valorMeta > 0 ? Math.min((totalGastos / meta.valorMeta) * 100, 150) : 0
       };
     } else {
-      const entradasMes = entradas.filter(e => {
+      const entradasMes = supabaseData.entradas.filter(e => {
         const matchMes = e.mes === mesKey;
         const matchResponsavel = meta.responsavel === 'Todos' || e.responsavel === meta.responsavel;
         const matchCategoria = !meta.categoria || e.categoria === meta.categoria;
@@ -312,8 +199,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const getResumoPessoa = (pessoa: 'William' | 'Andressa'): ResumoPessoa => {
     const mesKey = getMesAnoKey();
     
-    const entradasPessoa = entradas.filter(e => e.mes === mesKey && e.responsavel === pessoa);
-    const gastosPessoa = gastos.filter(g => g.mes === mesKey && g.responsavel === pessoa);
+    const entradasPessoa = supabaseData.entradas.filter(e => e.mes === mesKey && e.responsavel === pessoa);
+    const gastosPessoa = supabaseData.gastos.filter(g => g.mes === mesKey && g.responsavel === pessoa);
 
     const totalEntradas = entradasPessoa.reduce((sum, e) => sum + e.valor, 0);
     const totalGastos = gastosPessoa.reduce((sum, g) => sum + g.valor, 0);
@@ -346,11 +233,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   return (
     <FinanceContext.Provider value={{
-      entradas,
-      gastos,
-      contas,
-      metas,
-      categoriasPersonalizadas,
+      user: supabaseData.user,
+      isLoading: supabaseData.isLoading,
+      entradas: supabaseData.entradas,
+      gastos: supabaseData.gastos,
+      contas: supabaseData.contas,
+      metas: supabaseData.metas,
+      categoriasPersonalizadas: supabaseData.categoriasPersonalizadas,
       mesSelecionado,
       anoSelecionado,
       responsavelFiltro,
@@ -362,16 +251,16 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       addConta,
       addMeta,
       addCategoriaPersonalizada,
-      updateEntrada,
-      updateGasto,
-      updateConta,
-      updateMeta,
-      deleteEntrada,
-      deleteGasto,
-      deleteConta,
-      deleteMeta,
-      deleteCategoriaPersonalizada,
-      toggleContaPaga,
+      updateEntrada: supabaseData.updateEntrada,
+      updateGasto: supabaseData.updateGasto,
+      updateConta: supabaseData.updateConta,
+      updateMeta: supabaseData.updateMeta,
+      deleteEntrada: supabaseData.deleteEntrada,
+      deleteGasto: supabaseData.deleteGasto,
+      deleteConta: supabaseData.deleteConta,
+      deleteMeta: supabaseData.deleteMeta,
+      deleteCategoriaPersonalizada: supabaseData.deleteCategoriaPersonalizada,
+      toggleContaPaga: supabaseData.toggleContaPaga,
       getResumoMensal,
       getResumoPessoa,
       getEntradasFiltradas,
@@ -381,6 +270,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       getProgressoMeta,
       getCategoriasEntrada,
       getCategoriasGasto,
+      signOut: supabaseData.signOut,
     }}>
       {children}
     </FinanceContext.Provider>
