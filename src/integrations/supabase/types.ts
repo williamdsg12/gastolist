@@ -158,6 +158,54 @@ export type Database = {
         }
         Relationships: []
       }
+      lista_compras: {
+        Row: {
+          categoria: string
+          comprado: boolean
+          created_at: string
+          data: string
+          foto_url: string | null
+          id: string
+          loja: string | null
+          observacao: string | null
+          preco: number | null
+          produto: string
+          quantidade: number
+          unidade: string | null
+          user_id: string
+        }
+        Insert: {
+          categoria?: string
+          comprado?: boolean
+          created_at?: string
+          data?: string
+          foto_url?: string | null
+          id?: string
+          loja?: string | null
+          observacao?: string | null
+          preco?: number | null
+          produto: string
+          quantidade?: number
+          unidade?: string | null
+          user_id: string
+        }
+        Update: {
+          categoria?: string
+          comprado?: boolean
+          created_at?: string
+          data?: string
+          foto_url?: string | null
+          id?: string
+          loja?: string | null
+          observacao?: string | null
+          preco?: number | null
+          produto?: string
+          quantidade?: number
+          unidade?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       metas: {
         Row: {
           categoria: string | null
