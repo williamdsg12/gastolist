@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { FinanceProvider, useFinance } from '@/contexts/FinanceContext';
 import { BottomNav } from '@/components/BottomNav';
 import { Dashboard } from '@/components/Dashboard';
@@ -15,6 +16,7 @@ import { GerenciarCategorias } from '@/components/GerenciarCategorias';
 import { SplashScreen } from '@/components/SplashScreen';
 import { AuthScreen } from '@/components/AuthScreen';
 import { WidgetResumo } from '@/components/WidgetResumo';
+import { ListaCompras } from '@/components/ListaCompras';
 import { Wallet, Settings, Receipt, User, Calendar, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -29,6 +31,7 @@ const tabTitles: Record<Tab, string> = {
   perfil: 'Perfil Individual',
   historico: 'Histórico Anual',
   config: 'Configurações',
+  compras: 'Lista de Compras',
 };
 
 function AppContent() {
@@ -36,7 +39,6 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
 
-  // Show splash screen on first load
   useEffect(() => {
     const hasSeenSplash = sessionStorage.getItem('finance-splash-seen');
     if (hasSeenSplash === 'true') {
@@ -50,7 +52,7 @@ function AppContent() {
   };
 
   const handleAuth = () => {
-    // Auth is handled by the context, just refresh
+    // Auth is handled by the context
   };
 
   if (showSplash) {
@@ -82,7 +84,7 @@ function AppContent() {
                 <Wallet className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground">Finanças</h1>
+                <h1 className="text-lg font-bold text-foreground">Finanças & Compras</h1>
                 <p className="text-xs text-muted-foreground">{tabTitles[activeTab]}</p>
               </div>
             </div>
@@ -160,6 +162,7 @@ function AppContent() {
         {activeTab === 'perfil' && <Perfil />}
         {activeTab === 'historico' && <Historico />}
         {activeTab === 'config' && <Configuracoes />}
+        {activeTab === 'compras' && <ListaCompras />}
       </main>
 
       {/* Bottom Navigation */}
@@ -170,9 +173,11 @@ function AppContent() {
 
 const Index = () => {
   return (
-    <FinanceProvider>
-      <AppContent />
-    </FinanceProvider>
+    <ThemeProvider>
+      <FinanceProvider>
+        <AppContent />
+      </FinanceProvider>
+    </ThemeProvider>
   );
 };
 

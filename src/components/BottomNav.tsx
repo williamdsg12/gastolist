@@ -1,7 +1,7 @@
-import { LayoutDashboard, TrendingUp, TrendingDown, Target, User, History } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Target, History, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type Tab = 'dashboard' | 'entradas' | 'gastos' | 'contas' | 'metas' | 'perfil' | 'historico' | 'config';
+export type Tab = 'dashboard' | 'entradas' | 'gastos' | 'contas' | 'metas' | 'perfil' | 'historico' | 'config' | 'compras';
 
 interface BottomNavProps {
   activeTab: Tab;
@@ -12,8 +12,8 @@ const navItems = [
   { id: 'dashboard' as Tab, label: 'Resumo', icon: LayoutDashboard },
   { id: 'entradas' as Tab, label: 'Entradas', icon: TrendingUp },
   { id: 'gastos' as Tab, label: 'Gastos', icon: TrendingDown },
+  { id: 'compras' as Tab, label: 'Compras', icon: ShoppingCart },
   { id: 'metas' as Tab, label: 'Metas', icon: Target },
-  { id: 'historico' as Tab, label: 'Histórico', icon: History },
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
@@ -34,7 +34,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                 isActive && item.id === 'entradas' && "text-income",
                 isActive && item.id === 'gastos' && "text-expense",
                 isActive && item.id === 'metas' && "text-primary",
-                isActive && item.id === 'perfil' && "text-bills",
+                isActive && item.id === 'compras' && "text-income",
                 isActive && item.id === 'historico' && "text-primary",
                 isActive && item.id === 'dashboard' && "text-primary",
                 !isActive && "text-muted-foreground hover:text-foreground"

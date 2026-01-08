@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useFinance } from '@/contexts/FinanceContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { Settings, Download, Upload, Trash2, FileDown, Shield } from 'lucide-react';
+import { Settings, Download, Upload, Trash2, FileDown, Shield, Palette, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function Configuracoes() {
   const { entradas, gastos, contas } = useFinance();
+  const { theme } = useTheme();
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -33,7 +36,6 @@ export function Configuracoes() {
   };
 
   const exportCSV = () => {
-    // Export gastos as CSV
     const headers = ['Data', 'Descrição', 'Valor', 'Categoria', 'Responsável', 'Pago', 'Mês'];
     const rows = gastos.map(g => [
       g.data,
@@ -112,15 +114,31 @@ export function Configuracoes() {
 
   return (
     <div className="space-y-4 pb-4">
+      {/* Theme */}
       <Card className="shadow-card animate-fade-in">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Settings className="w-5 h-5" />
-            Configurações
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Palette className="w-4 h-4" />
+            Aparência
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Statistics */}
+        <CardContent>
+          <div className="space-y-3">
+            <Label className="text-sm text-muted-foreground">Tema do aplicativo</Label>
+            <ThemeToggle />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Statistics */}
+      <Card className="shadow-card animate-fade-in" style={{ animationDelay: '0.05s' }}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Settings className="w-4 h-4" />
+            Estatísticas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-3 gap-3 p-4 bg-secondary rounded-lg">
             <div className="text-center">
               <p className="text-2xl font-bold text-income">{entradas.length}</p>
@@ -139,7 +157,7 @@ export function Configuracoes() {
       </Card>
 
       {/* Security */}
-      <Card className="shadow-card animate-fade-in" style={{ animationDelay: '0.05s' }}>
+      <Card className="shadow-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Shield className="w-4 h-4" />
@@ -199,7 +217,7 @@ export function Configuracoes() {
       </Card>
 
       {/* Export/Import */}
-      <Card className="shadow-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      <Card className="shadow-card animate-fade-in" style={{ animationDelay: '0.15s' }}>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Download className="w-4 h-4" />
@@ -233,7 +251,7 @@ export function Configuracoes() {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="shadow-card border-destructive/30 animate-fade-in" style={{ animationDelay: '0.15s' }}>
+      <Card className="shadow-card border-destructive/30 animate-fade-in" style={{ animationDelay: '0.2s' }}>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base text-destructive">
             <Trash2 className="w-4 h-4" />
@@ -268,10 +286,22 @@ export function Configuracoes() {
         </CardContent>
       </Card>
 
-      {/* Version */}
-      <p className="text-center text-xs text-muted-foreground pt-4">
-        Gestão Financeira v1.0 • William & Andressa
-      </p>
+      {/* About */}
+      <Card className="shadow-card animate-fade-in" style={{ animationDelay: '0.25s' }}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Info className="w-4 h-4" />
+            Sobre
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-center">
+          <p className="font-semibold">Gestão Financeira & Compras</p>
+          <p className="text-sm text-muted-foreground">Versão 2.0</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Criado com 💚 por William & Andressa
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
