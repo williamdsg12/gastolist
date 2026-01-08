@@ -30,6 +30,16 @@ export interface Conta {
   mes: string;
 }
 
+export interface Meta {
+  id: string;
+  nome: string;
+  valorMeta: number;
+  tipo: 'economia' | 'limite_gasto' | 'entrada';
+  categoria?: string;
+  responsavel: 'William' | 'Andressa' | 'Todos';
+  mes: string;
+}
+
 export interface ResumoMensal {
   totalEntradas: number;
   totalGastos: number;
@@ -38,6 +48,14 @@ export interface ResumoMensal {
   contasPendentes: number;
   contasPagas: number;
   valorPendente: number;
+}
+
+export interface ResumoPessoa {
+  totalEntradas: number;
+  totalGastos: number;
+  saldo: number;
+  gastosPorCategoria: Record<string, number>;
+  categoriasMaisUsadas: { categoria: string; valor: number; quantidade: number }[];
 }
 
 export type Responsavel = 'William' | 'Andressa' | 'Todos';

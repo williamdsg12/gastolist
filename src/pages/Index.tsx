@@ -6,16 +6,22 @@ import { Entradas } from '@/components/Entradas';
 import { Gastos } from '@/components/Gastos';
 import { Contas } from '@/components/Contas';
 import { Configuracoes } from '@/components/Configuracoes';
+import { Metas } from '@/components/Metas';
+import { Perfil } from '@/components/Perfil';
 import { PinLockScreen } from '@/components/PinLockScreen';
-import { Wallet } from 'lucide-react';
+import { Wallet, Settings, Receipt } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-type Tab = 'dashboard' | 'entradas' | 'gastos' | 'contas' | 'config';
+type Tab = 'dashboard' | 'entradas' | 'gastos' | 'contas' | 'metas' | 'perfil' | 'config';
 
 const tabTitles: Record<Tab, string> = {
   dashboard: 'Resumo Mensal',
   entradas: 'Entradas',
   gastos: 'Gastos',
   contas: 'Contas a Pagar',
+  metas: 'Metas Financeiras',
+  perfil: 'Perfil Individual',
   config: 'Configurações',
 };
 
@@ -25,15 +31,12 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if PIN is set - if not, we'll show the setup screen
-    // Check session storage for current session unlock status
     const sessionUnlocked = sessionStorage.getItem('finance-unlocked');
     const hasPin = localStorage.getItem('finance-pin');
     
     if (sessionUnlocked === 'true') {
       setIsUnlocked(true);
     } else if (!hasPin) {
-      // No PIN set, will show setup screen via PinLockScreen
       setIsUnlocked(false);
     }
     
@@ -65,13 +68,37 @@ const Index = () => {
         {/* Header */}
         <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
           <div className="container max-w-lg mx-auto px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary">
-                <Wallet className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary">
+                  <Wallet className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-foreground">Finanças</h1>
+                  <p className="text-xs text-muted-foreground">{tabTitles[activeTab]}</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-lg font-bold text-foreground">Finanças</h1>
-                <p className="text-xs text-muted-foreground">{tabTitles[activeTab]}</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={activeTab === 'contas' ? 'text-bills' : 'text-muted-foreground'}
+                  onClick={() => setActiveTab('contas')}
+                >
+                  <Receipt className="w-5 h-5" />
+                </Button>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground">
+                      <Settings className="w-5 h-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+                    <div className="pt-6">
+                      <Configuracoes />
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
           </div>
@@ -83,6 +110,8 @@ const Index = () => {
           {activeTab === 'entradas' && <Entradas />}
           {activeTab === 'gastos' && <Gastos />}
           {activeTab === 'contas' && <Contas />}
+          {activeTab === 'metas' && <Metas />}
+          {activeTab === 'perfil' && <Perfil />}
           {activeTab === 'config' && <Configuracoes />}
         </main>
 
