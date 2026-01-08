@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MonthFilter } from '@/components/MonthFilter';
-import { CATEGORIAS_GASTO } from '@/types/finance';
 import { Plus, Trash2, TrendingDown, Check } from 'lucide-react';
 
 const formatCurrency = (value: number) => {
@@ -19,7 +18,8 @@ const formatCurrency = (value: number) => {
 };
 
 export function Gastos() {
-  const { getGastosFiltrados, addGasto, deleteGasto, updateGasto } = useFinance();
+  const { getGastosFiltrados, addGasto, deleteGasto, updateGasto, getCategoriasGasto } = useFinance();
+  const categoriasGasto = getCategoriasGasto();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     data: new Date().toISOString().split('T')[0],
@@ -128,7 +128,7 @@ export function Gastos() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIAS_GASTO.map((cat) => (
+                  {categoriasGasto.map((cat) => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>

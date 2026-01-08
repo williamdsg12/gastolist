@@ -1,11 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Entrada, Gasto, Conta, Meta, ResumoMensal, ResumoPessoa, Responsavel, MESES } from '@/types/finance';
+import { Entrada, Gasto, Conta, Meta, ResumoMensal, ResumoPessoa, Responsavel, MESES, CATEGORIAS_ENTRADA, CATEGORIAS_GASTO } from '@/types/finance';
+
+interface CategoriaPersonalizada {
+  id: string;
+  nome: string;
+  tipo: 'entrada' | 'gasto';
+  cor: string;
+}
 
 interface FinanceContextType {
   entradas: Entrada[];
   gastos: Gasto[];
   contas: Conta[];
   metas: Meta[];
+  categoriasPersonalizadas: CategoriaPersonalizada[];
   mesSelecionado: string;
   anoSelecionado: number;
   responsavelFiltro: Responsavel;
@@ -16,6 +24,7 @@ interface FinanceContextType {
   addGasto: (gasto: Omit<Gasto, 'id' | 'mes'>) => void;
   addConta: (conta: Omit<Conta, 'id' | 'mes'>) => void;
   addMeta: (meta: Omit<Meta, 'id' | 'mes'>) => void;
+  addCategoriaPersonalizada: (cat: Omit<CategoriaPersonalizada, 'id'>) => void;
   updateEntrada: (id: string, entrada: Partial<Entrada>) => void;
   updateGasto: (id: string, gasto: Partial<Gasto>) => void;
   updateConta: (id: string, conta: Partial<Conta>) => void;
@@ -24,6 +33,7 @@ interface FinanceContextType {
   deleteGasto: (id: string) => void;
   deleteConta: (id: string) => void;
   deleteMeta: (id: string) => void;
+  deleteCategoriaPersonalizada: (id: string) => void;
   toggleContaPaga: (id: string) => void;
   getResumoMensal: () => ResumoMensal;
   getResumoPessoa: (pessoa: 'William' | 'Andressa') => ResumoPessoa;
@@ -32,6 +42,8 @@ interface FinanceContextType {
   getContasFiltradas: () => Conta[];
   getMetasFiltradas: () => Meta[];
   getProgressoMeta: (meta: Meta) => { atual: number; percentual: number };
+  getCategoriasEntrada: () => string[];
+  getCategoriasGasto: () => string[];
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -62,6 +74,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [categoriasPersonalizadas, setCategoriasPersonalizadas] = useState<CategoriaPersonalizada[]>(() => {
+    const saved = localStorage.getItem('categorias_personalizadas');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [mesSelecionado, setMesSelecionado] = useState(getCurrentMonth());
   const [anoSelecionado, setAnoSelecionado] = useState(getCurrentYear());
   const [responsavelFiltro, setResponsavelFiltro] = useState<Responsavel>('Todos');
@@ -82,7 +99,25 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('metas', JSON.stringify(metas));
   }, [metas]);
 
+  useEffect(() => {
+    localStorage.setItem('categorias_personalizadas', JSON.stringify(categoriasPersonalizadas));
+  }, [categoriasPersonalizadas]);
+
   const getMesAnoKey = () => `${mesSelecionado}-${anoSelecionado}`;
+
+  const getCategoriasEntrada = () => {
+    const personalizadas = categoriasPersonalizadas
+      .filter(c => c.tipo === 'entrada')
+      .map(c => c.nome);
+    return [...CATEGORIAS_ENTRADA, ...personalizadas];
+  };
+
+  const getCategoriasGasto = () => {
+    const personalizadas = categoriasPersonalizadas
+      .filter(c => c.tipo === 'gasto')
+      .map(c => c.nome);
+    return [...CATEGORIAS_GASTO, ...personalizadas];
+  };
 
   const addEntrada = (entrada: Omit<Entrada, 'id' | 'mes'>) => {
     const newEntrada: Entrada = {
@@ -120,6 +155,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setMetas(prev => [...prev, newMeta]);
   };
 
+  const addCategoriaPersonalizada = (cat: Omit<CategoriaPersonalizada, 'id'>) => {
+    const newCat: CategoriaPersonalizada = {
+      ...cat,
+      id: generateId(),
+    };
+    setCategoriasPersonalizadas(prev => [...prev, newCat]);
+  };
+
   const updateEntrada = (id: string, data: Partial<Entrada>) => {
     setEntradas(prev => prev.map(e => e.id === id ? { ...e, ...data } : e));
   };
@@ -150,6 +193,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const deleteMeta = (id: string) => {
     setMetas(prev => prev.filter(m => m.id !== id));
+  };
+
+  const deleteCategoriaPersonalizada = (id: string) => {
+    setCategoriasPersonalizadas(prev => prev.filter(c => c.id !== id));
   };
 
   const toggleContaPaga = (id: string) => {
@@ -303,6 +350,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       gastos,
       contas,
       metas,
+      categoriasPersonalizadas,
       mesSelecionado,
       anoSelecionado,
       responsavelFiltro,
@@ -313,6 +361,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       addGasto,
       addConta,
       addMeta,
+      addCategoriaPersonalizada,
       updateEntrada,
       updateGasto,
       updateConta,
@@ -321,6 +370,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       deleteGasto,
       deleteConta,
       deleteMeta,
+      deleteCategoriaPersonalizada,
       toggleContaPaga,
       getResumoMensal,
       getResumoPessoa,
@@ -329,6 +379,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       getContasFiltradas,
       getMetasFiltradas,
       getProgressoMeta,
+      getCategoriasEntrada,
+      getCategoriasGasto,
     }}>
       {children}
     </FinanceContext.Provider>

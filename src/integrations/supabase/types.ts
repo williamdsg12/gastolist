@@ -14,7 +14,210 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categorias: {
+        Row: {
+          cor: string | null
+          created_at: string
+          icone: string | null
+          id: string
+          nome: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          icone?: string | null
+          id?: string
+          nome: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          icone?: string | null
+          id?: string
+          nome?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      contas: {
+        Row: {
+          conta: string
+          created_at: string
+          data_pagamento: string | null
+          id: string
+          mes: string
+          pago: boolean
+          responsavel: string
+          user_id: string
+          valor: number
+          vencimento: string
+        }
+        Insert: {
+          conta: string
+          created_at?: string
+          data_pagamento?: string | null
+          id?: string
+          mes: string
+          pago?: boolean
+          responsavel: string
+          user_id: string
+          valor: number
+          vencimento: string
+        }
+        Update: {
+          conta?: string
+          created_at?: string
+          data_pagamento?: string | null
+          id?: string
+          mes?: string
+          pago?: boolean
+          responsavel?: string
+          user_id?: string
+          valor?: number
+          vencimento?: string
+        }
+        Relationships: []
+      }
+      entradas: {
+        Row: {
+          categoria: string
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          mes: string
+          responsavel: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          data?: string
+          descricao: string
+          id?: string
+          mes: string
+          responsavel: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          mes?: string
+          responsavel?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      gastos: {
+        Row: {
+          categoria: string
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          mes: string
+          pago: boolean
+          responsavel: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          data?: string
+          descricao: string
+          id?: string
+          mes: string
+          pago?: boolean
+          responsavel: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          mes?: string
+          pago?: boolean
+          responsavel?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      metas: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          id: string
+          mes: string
+          nome: string
+          responsavel: string
+          tipo: string
+          user_id: string
+          valor_meta: number
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          id?: string
+          mes: string
+          nome: string
+          responsavel: string
+          tipo: string
+          user_id: string
+          valor_meta: number
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          id?: string
+          mes?: string
+          nome?: string
+          responsavel?: string
+          tipo?: string
+          user_id?: string
+          valor_meta?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

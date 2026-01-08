@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MonthFilter } from '@/components/MonthFilter';
-import { CATEGORIAS_ENTRADA } from '@/types/finance';
 import { Plus, Trash2, TrendingUp } from 'lucide-react';
 
 const formatCurrency = (value: number) => {
@@ -18,7 +17,8 @@ const formatCurrency = (value: number) => {
 };
 
 export function Entradas() {
-  const { getEntradasFiltradas, addEntrada, deleteEntrada } = useFinance();
+  const { getEntradasFiltradas, addEntrada, deleteEntrada, getCategoriasEntrada } = useFinance();
+  const categoriasEntrada = getCategoriasEntrada();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     data: new Date().toISOString().split('T')[0],
@@ -122,7 +122,7 @@ export function Entradas() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIAS_ENTRADA.map((cat) => (
+                  {categoriasEntrada.map((cat) => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>

@@ -14,7 +14,6 @@ const navItems = [
   { id: 'gastos' as Tab, label: 'Gastos', icon: TrendingDown },
   { id: 'metas' as Tab, label: 'Metas', icon: Target },
   { id: 'historico' as Tab, label: 'Histórico', icon: History },
-  { id: 'perfil' as Tab, label: 'Perfil', icon: User },
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
