@@ -62,7 +62,7 @@ export function useShoppingData(): UseShoppingDataReturn {
           comprado: item.comprado,
           loja: item.loja || undefined,
           observacao: item.observacao || undefined,
-          fotoUrl: item.foto_url || undefined,
+          foto_url: item.foto_url || undefined,
           data: item.data,
         })));
       }
@@ -90,7 +90,7 @@ export function useShoppingData(): UseShoppingDataReturn {
       comprado: item.comprado,
       loja: item.loja || null,
       observacao: item.observacao || null,
-      foto_url: item.fotoUrl || null,
+      foto_url: item.foto_url || null,
       user_id: user.id,
     }).select().single();
 
@@ -110,7 +110,7 @@ export function useShoppingData(): UseShoppingDataReturn {
         comprado: data.comprado,
         loja: data.loja || undefined,
         observacao: data.observacao || undefined,
-        fotoUrl: data.foto_url || undefined,
+        foto_url: data.foto_url || undefined,
         data: data.data,
       }].sort((a, b) => a.categoria.localeCompare(b.categoria)));
       toast.success('Item adicionado!');
@@ -127,7 +127,7 @@ export function useShoppingData(): UseShoppingDataReturn {
       comprado: data.comprado,
       loja: data.loja || null,
       observacao: data.observacao || null,
-      foto_url: data.fotoUrl || null,
+      foto_url: data.foto_url || null,
     }).eq('id', id);
 
     if (error) {

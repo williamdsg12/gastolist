@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MonthFilter } from '@/components/MonthFilter';
-import { Plus, Trash2, TrendingUp } from 'lucide-react';
+import { ReceiptScanner } from '@/components/ReceiptScanner';
+import { Plus, Trash2, TrendingUp, FileImage } from 'lucide-react';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -57,7 +58,6 @@ export function Entradas() {
     <div className="space-y-4 pb-4">
       <MonthFilter />
 
-      {/* Total Card */}
       <Card className="income-gradient text-income-foreground shadow-card animate-fade-in">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -70,84 +70,74 @@ export function Entradas() {
         </CardContent>
       </Card>
 
-      {/* Add Button */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="w-full h-12 text-base font-semibold income-gradient hover:opacity-90 text-income-foreground shadow-card">
-            <Plus className="w-5 h-5 mr-2" />
-            Nova Entrada
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-income" />
-              Adicionar Entrada
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="data">Data</Label>
-              <Input
-                id="data"
-                type="date"
-                value={form.data}
-                onChange={(e) => setForm({ ...form, data: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="descricao">Descrição</Label>
-              <Input
-                id="descricao"
-                placeholder="Ex: Salário mensal"
-                value={form.descricao}
-                onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="valor">Valor (R$)</Label>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                placeholder="0,00"
-                value={form.valor}
-                onChange={(e) => setForm({ ...form, valor: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select value={form.categoria} onValueChange={(v) => setForm({ ...form, categoria: v })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoriasEntrada.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Responsável</Label>
-              <Select value={form.responsavel} onValueChange={(v) => setForm({ ...form, responsavel: v as 'William' | 'Andressa' })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="William">William</SelectItem>
-                  <SelectItem value="Andressa">Andressa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" className="w-full income-gradient text-income-foreground">
-              Adicionar
+      <div className="flex gap-2">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex-1 h-12 text-base font-semibold income-gradient hover:opacity-90 text-income-foreground shadow-card">
+              <Plus className="w-5 h-5 mr-2" />
+              Nova Entrada
             </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-income" />
+                Adicionar Entrada
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="data">Data</Label>
+                <Input id="data" type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="descricao">Descrição</Label>
+                <Input id="descricao" placeholder="Ex: Salário mensal" value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="valor">Valor (R$)</Label>
+                <Input id="valor" type="number" step="0.01" placeholder="0,00" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Select value={form.categoria} onValueChange={(v) => setForm({ ...form, categoria: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {categoriasEntrada.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Responsável</Label>
+                <Select value={form.responsavel} onValueChange={(v) => setForm({ ...form, responsavel: v as 'William' | 'Andressa' })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="William">William</SelectItem>
+                    <SelectItem value="Andressa">Andressa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full income-gradient text-income-foreground">Adicionar</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+        
+        <ReceiptScanner 
+          tipo="entrada"
+          onResult={(data) => {
+            setForm({
+              data: data.data,
+              descricao: data.descricao,
+              valor: data.valor.toString(),
+              categoria: categoriasEntrada.includes(data.categoria) ? data.categoria : 'Outros',
+              responsavel: 'William',
+            });
+            setOpen(true);
+          }}
+          trigger={<Button variant="outline" size="icon" className="h-12 w-12"><FileImage className="w-5 h-5" /></Button>}
+        />
+      </div>
 
-      {/* List */}
       <div className="space-y-2">
         {entradasFiltradas.length === 0 ? (
           <Card className="shadow-card">
@@ -158,19 +148,13 @@ export function Entradas() {
           </Card>
         ) : (
           entradasFiltradas.map((entrada, index) => (
-            <Card 
-              key={entrada.id} 
-              className="shadow-card animate-fade-in hover:shadow-card-hover transition-shadow"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
+            <Card key={entrada.id} className="shadow-card animate-fade-in hover:shadow-card-hover transition-shadow" style={{ animationDelay: `${index * 0.05}s` }}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium">{entrada.descricao}</span>
-                      <span className="text-xs px-2 py-0.5 bg-income-muted text-income rounded-full">
-                        {entrada.responsavel}
-                      </span>
+                      <span className="text-xs px-2 py-0.5 bg-income-muted text-income rounded-full">{entrada.responsavel}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{new Date(entrada.data).toLocaleDateString('pt-BR')}</span>
@@ -180,12 +164,7 @@ export function Entradas() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-income">{formatCurrency(entrada.valor)}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => deleteEntrada(entrada.id)}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteEntrada(entrada.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>

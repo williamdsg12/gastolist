@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MonthFilter } from '@/components/MonthFilter';
-import { Plus, Trash2, TrendingDown, Check } from 'lucide-react';
+import { ReceiptScanner } from '@/components/ReceiptScanner';
+import { Plus, Trash2, TrendingDown, Check, FileImage } from 'lucide-react';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -47,14 +48,7 @@ export function Gastos() {
       pago: form.pago,
     });
 
-    setForm({
-      data: new Date().toISOString().split('T')[0],
-      descricao: '',
-      valor: '',
-      categoria: 'Alimentação',
-      responsavel: 'William',
-      pago: true,
-    });
+    setForm({ data: new Date().toISOString().split('T')[0], descricao: '', valor: '', categoria: 'Alimentação', responsavel: 'William', pago: true });
     setOpen(false);
   };
 
@@ -62,7 +56,6 @@ export function Gastos() {
     <div className="space-y-4 pb-4">
       <MonthFilter />
 
-      {/* Total Card */}
       <Card className="expense-gradient text-expense-foreground shadow-card animate-fade-in">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -76,92 +69,79 @@ export function Gastos() {
         </CardContent>
       </Card>
 
-      {/* Add Button */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="w-full h-12 text-base font-semibold expense-gradient hover:opacity-90 text-expense-foreground shadow-card">
-            <Plus className="w-5 h-5 mr-2" />
-            Novo Gasto
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <TrendingDown className="w-5 h-5 text-expense" />
-              Adicionar Gasto
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="data">Data</Label>
-              <Input
-                id="data"
-                type="date"
-                value={form.data}
-                onChange={(e) => setForm({ ...form, data: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="descricao">Descrição</Label>
-              <Input
-                id="descricao"
-                placeholder="Ex: Supermercado"
-                value={form.descricao}
-                onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="valor">Valor (R$)</Label>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                placeholder="0,00"
-                value={form.valor}
-                onChange={(e) => setForm({ ...form, valor: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select value={form.categoria} onValueChange={(v) => setForm({ ...form, categoria: v })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoriasGasto.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Responsável</Label>
-              <Select value={form.responsavel} onValueChange={(v) => setForm({ ...form, responsavel: v as 'William' | 'Andressa' })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="William">William</SelectItem>
-                  <SelectItem value="Andressa">Andressa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox 
-                id="pago" 
-                checked={form.pago}
-                onCheckedChange={(checked) => setForm({ ...form, pago: !!checked })}
-              />
-              <Label htmlFor="pago" className="text-sm">Já foi pago</Label>
-            </div>
-            <Button type="submit" className="w-full expense-gradient text-expense-foreground">
-              Adicionar
+      <div className="flex gap-2">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex-1 h-12 text-base font-semibold expense-gradient hover:opacity-90 text-expense-foreground shadow-card">
+              <Plus className="w-5 h-5 mr-2" />
+              Novo Gasto
             </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingDown className="w-5 h-5 text-expense" />
+                Adicionar Gasto
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="data">Data</Label>
+                <Input id="data" type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="descricao">Descrição</Label>
+                <Input id="descricao" placeholder="Ex: Supermercado" value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="valor">Valor (R$)</Label>
+                <Input id="valor" type="number" step="0.01" placeholder="0,00" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Select value={form.categoria} onValueChange={(v) => setForm({ ...form, categoria: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {categoriasGasto.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Responsável</Label>
+                <Select value={form.responsavel} onValueChange={(v) => setForm({ ...form, responsavel: v as 'William' | 'Andressa' })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="William">William</SelectItem>
+                    <SelectItem value="Andressa">Andressa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="pago" checked={form.pago} onCheckedChange={(checked) => setForm({ ...form, pago: !!checked })} />
+                <Label htmlFor="pago" className="text-sm">Já foi pago</Label>
+              </div>
+              <Button type="submit" className="w-full expense-gradient text-expense-foreground">Adicionar</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+        
+        <ReceiptScanner 
+          tipo="gasto"
+          onResult={(data) => {
+            setForm({
+              data: data.data,
+              descricao: data.descricao,
+              valor: data.valor.toString(),
+              categoria: categoriasGasto.includes(data.categoria) ? data.categoria : 'Outros',
+              responsavel: 'William',
+              pago: true,
+            });
+            setOpen(true);
+          }}
+          trigger={<Button variant="outline" size="icon" className="h-12 w-12"><FileImage className="w-5 h-5" /></Button>}
+        />
+      </div>
 
-      {/* List */}
       <div className="space-y-2">
         {gastosFiltrados.length === 0 ? (
           <Card className="shadow-card">
@@ -172,32 +152,17 @@ export function Gastos() {
           </Card>
         ) : (
           gastosFiltrados.map((gasto, index) => (
-            <Card 
-              key={gasto.id} 
-              className="shadow-card animate-fade-in hover:shadow-card-hover transition-shadow"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
+            <Card key={gasto.id} className="shadow-card animate-fade-in hover:shadow-card-hover transition-shadow" style={{ animationDelay: `${index * 0.05}s` }}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => updateGasto(gasto.id, { pago: !gasto.pago })}
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                        gasto.pago 
-                          ? 'bg-income border-income text-income-foreground' 
-                          : 'border-muted-foreground'
-                      }`}
-                    >
+                    <button onClick={() => updateGasto(gasto.id, { pago: !gasto.pago })} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${gasto.pago ? 'bg-income border-income text-income-foreground' : 'border-muted-foreground'}`}>
                       {gasto.pago && <Check className="w-3 h-3" />}
                     </button>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className={`font-medium ${gasto.pago ? 'line-through opacity-60' : ''}`}>
-                          {gasto.descricao}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 bg-expense-muted text-expense rounded-full">
-                          {gasto.responsavel}
-                        </span>
+                        <span className={`font-medium ${gasto.pago ? 'line-through opacity-60' : ''}`}>{gasto.descricao}</span>
+                        <span className="text-xs px-2 py-0.5 bg-expense-muted text-expense rounded-full">{gasto.responsavel}</span>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{new Date(gasto.data).toLocaleDateString('pt-BR')}</span>
@@ -207,15 +172,8 @@ export function Gastos() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`font-bold text-expense ${gasto.pago ? 'opacity-60' : ''}`}>
-                      {formatCurrency(gasto.valor)}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => deleteGasto(gasto.id)}
-                    >
+                    <span className={`font-bold text-expense ${gasto.pago ? 'opacity-60' : ''}`}>{formatCurrency(gasto.valor)}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteGasto(gasto.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
