@@ -7,9 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ImageUpload } from '@/components/ImageUpload';
 import { 
   Plus, Search, ShoppingCart, Trash2, Edit2, Copy, Package,
   Apple, Carrot, Beef, Milk, Croissant, Package2, Wine, Sparkles, Heart
@@ -67,6 +66,7 @@ export function ListaCompras() {
   const [formCategoria, setFormCategoria] = useState('Mercearia');
   const [formLoja, setFormLoja] = useState('');
   const [formObservacao, setFormObservacao] = useState('');
+  const [formFotoUrl, setFormFotoUrl] = useState<string | undefined>();
 
   const resetForm = () => {
     setFormProduto('');
@@ -76,6 +76,7 @@ export function ListaCompras() {
     setFormCategoria('Mercearia');
     setFormLoja('');
     setFormObservacao('');
+    setFormFotoUrl(undefined);
     setEditingItem(null);
   };
 
@@ -92,6 +93,7 @@ export function ListaCompras() {
     setFormCategoria(item.categoria);
     setFormLoja(item.loja || '');
     setFormObservacao(item.observacao || '');
+    setFormFotoUrl(item.foto_url || undefined);
     setEditingItem(item);
     setAddDialogOpen(true);
   };
@@ -111,6 +113,7 @@ export function ListaCompras() {
       comprado: editingItem?.comprado || false,
       loja: formLoja.trim() || undefined,
       observacao: formObservacao.trim() || undefined,
+      foto_url: formFotoUrl,
     };
 
     if (editingItem) {
@@ -296,6 +299,13 @@ export function ListaCompras() {
                         onCheckedChange={() => toggleComprado(item.id)}
                         className="data-[state=checked]:bg-income data-[state=checked]:border-income"
                       />
+                      {item.foto_url && (
+                        <img 
+                          src={item.foto_url} 
+                          alt={item.produto} 
+                          className="w-10 h-10 rounded-md object-cover border border-border"
+                        />
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className={`font-medium text-sm truncate ${item.comprado ? 'line-through text-muted-foreground' : ''}`}>
                           {item.produto}
@@ -442,6 +452,15 @@ export function ListaCompras() {
                 placeholder="Ex: Preferência de marca"
                 value={formObservacao}
                 onChange={(e) => setFormObservacao(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Foto do Produto (opcional)</Label>
+              <ImageUpload 
+                value={formFotoUrl} 
+                onChange={setFormFotoUrl}
+                folder="products"
               />
             </div>
           </div>

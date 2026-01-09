@@ -8,7 +8,7 @@ export interface ItemCompra {
   comprado: boolean;
   loja?: string;
   observacao?: string;
-  fotoUrl?: string;
+  foto_url?: string;
   data: string;
 }
 
