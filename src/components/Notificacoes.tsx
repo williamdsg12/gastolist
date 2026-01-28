@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Bell, X, AlertTriangle, Calendar, Target, CheckCircle2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 interface Notificacao {
   id: string;
@@ -23,9 +24,10 @@ const formatCurrency = (value: number) => {
 };
 
 export function Notificacoes() {
-  const { getContasFiltradas, getMetasFiltradas, getProgressoMeta, contas, metas, mesSelecionado, anoSelecionado } = useFinance();
+  const { getProgressoMeta, contas, metas, mesSelecionado, anoSelecionado } = useFinance();
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [open, setOpen] = useState(false);
+  const [notifiedIds, setNotifiedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const novasNotificacoes: Notificacao[] = [];
@@ -39,23 +41,50 @@ export function Notificacoes() {
       const diffDias = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
       
       if (diffDias <= 3 && diffDias >= 0) {
+        const notifId = `conta-${conta.id}`;
         novasNotificacoes.push({
-          id: `conta-${conta.id}`,
+          id: notifId,
           tipo: 'conta_vencendo',
           titulo: diffDias === 0 ? 'Conta vence hoje!' : `Conta vence em ${diffDias} dia${diffDias > 1 ? 's' : ''}`,
           mensagem: `${conta.conta} - ${formatCurrency(conta.valor)}`,
           data: vencimento,
           lida: false,
         });
+
+        // Show toast notification once per session
+        if (!notifiedIds.has(notifId)) {
+          setTimeout(() => {
+            toast.warning(
+              diffDias === 0 ? `⚠️ Conta vence hoje: ${conta.conta}` : `📅 Conta próxima do vencimento: ${conta.conta}`,
+              {
+                description: formatCurrency(conta.valor),
+                duration: 5000,
+              }
+            );
+          }, 1000);
+          setNotifiedIds(prev => new Set(prev).add(notifId));
+        }
       } else if (diffDias < 0) {
+        const notifId = `conta-vencida-${conta.id}`;
         novasNotificacoes.push({
-          id: `conta-vencida-${conta.id}`,
+          id: notifId,
           tipo: 'conta_vencendo',
           titulo: 'Conta vencida!',
           mensagem: `${conta.conta} - ${formatCurrency(conta.valor)} (venceu há ${Math.abs(diffDias)} dias)`,
           data: vencimento,
           lida: false,
         });
+
+        // Show toast notification once per session
+        if (!notifiedIds.has(notifId)) {
+          setTimeout(() => {
+            toast.error(`🚨 Conta vencida: ${conta.conta}`, {
+              description: `Venceu há ${Math.abs(diffDias)} dias - ${formatCurrency(conta.valor)}`,
+              duration: 6000,
+            });
+          }, 1500);
+          setNotifiedIds(prev => new Set(prev).add(notifId));
+        }
       }
     });
 
@@ -66,38 +95,71 @@ export function Notificacoes() {
       
       if (meta.tipo === 'limite_gasto') {
         if (progresso.percentual >= 100) {
+          const notifId = `meta-excedida-${meta.id}`;
           novasNotificacoes.push({
-            id: `meta-excedida-${meta.id}`,
+            id: notifId,
             tipo: 'meta_alerta',
             titulo: 'Limite de gasto excedido!',
             mensagem: `${meta.nome}: ${formatCurrency(progresso.atual)} de ${formatCurrency(meta.valorMeta)}`,
             data: new Date(),
             lida: false,
           });
+
+          if (!notifiedIds.has(notifId)) {
+            setTimeout(() => {
+              toast.error(`🚫 Limite excedido: ${meta.nome}`, {
+                description: `${formatCurrency(progresso.atual)} de ${formatCurrency(meta.valorMeta)}`,
+                duration: 5000,
+              });
+            }, 2000);
+            setNotifiedIds(prev => new Set(prev).add(notifId));
+          }
         } else if (progresso.percentual >= 80) {
+          const notifId = `meta-alerta-${meta.id}`;
           novasNotificacoes.push({
-            id: `meta-alerta-${meta.id}`,
+            id: notifId,
             tipo: 'meta_alerta',
             titulo: 'Próximo do limite!',
             mensagem: `${meta.nome}: ${progresso.percentual.toFixed(0)}% do limite usado`,
             data: new Date(),
             lida: false,
           });
+
+          if (!notifiedIds.has(notifId)) {
+            setTimeout(() => {
+              toast.warning(`⚠️ Próximo do limite: ${meta.nome}`, {
+                description: `${progresso.percentual.toFixed(0)}% do limite usado`,
+                duration: 4000,
+              });
+            }, 2500);
+            setNotifiedIds(prev => new Set(prev).add(notifId));
+          }
         }
       } else if (progresso.percentual >= 100) {
+        const notifId = `meta-atingida-${meta.id}`;
         novasNotificacoes.push({
-          id: `meta-atingida-${meta.id}`,
+          id: notifId,
           tipo: 'meta_atingida',
           titulo: 'Meta atingida! 🎉',
           mensagem: `${meta.nome}: ${formatCurrency(progresso.atual)}`,
           data: new Date(),
           lida: false,
         });
+
+        if (!notifiedIds.has(notifId)) {
+          setTimeout(() => {
+            toast.success(`🎉 Meta atingida: ${meta.nome}`, {
+              description: formatCurrency(progresso.atual),
+              duration: 5000,
+            });
+          }, 3000);
+          setNotifiedIds(prev => new Set(prev).add(notifId));
+        }
       }
     });
 
     setNotificacoes(novasNotificacoes);
-  }, [contas, metas, mesSelecionado, anoSelecionado, getProgressoMeta]);
+  }, [contas, metas, mesSelecionado, anoSelecionado, getProgressoMeta, notifiedIds]);
 
   const marcarComoLida = (id: string) => {
     setNotificacoes(prev => prev.filter(n => n.id !== id));
@@ -129,7 +191,7 @@ export function Notificacoes() {
           <Bell className="w-5 h-5" />
           {naoLidas > 0 && (
             <Badge 
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-expense text-expense-foreground text-[10px]"
+              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-expense text-expense-foreground text-[10px] animate-pulse"
             >
               {naoLidas}
             </Badge>
