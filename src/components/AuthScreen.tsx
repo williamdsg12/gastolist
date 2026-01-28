@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wallet, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Wallet, Mail, Lock, User, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AuthScreenProps {
@@ -21,6 +22,9 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
   const [signupNome, setSignupNome] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +71,32 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       toast.error(error.message || 'Erro ao criar conta');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast.error('Digite seu email');
+      return;
+    }
+
+    setIsResetting(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}`,
+      });
+
+      if (error) throw error;
+      
+      toast.success('Email de recuperação enviado! Verifique sua caixa de entrada.');
+      setShowResetDialog(false);
+      setResetEmail('');
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao enviar email de recuperação');
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -139,6 +169,15 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Entrando...' : 'Entrar'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="w-full text-sm text-muted-foreground"
+                    onClick={() => setShowResetDialog(true)}
+                  >
+                    <KeyRound className="w-4 h-4 mr-2" />
+                    Esqueci minha senha
                   </Button>
                 </form>
               </CardContent>
@@ -217,6 +256,51 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
           </Tabs>
         </Card>
       </div>
+
+      {/* Password Reset Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-primary" />
+              Recuperar Senha
+            </DialogTitle>
+            <DialogDescription>
+              Digite seu email para receber um link de recuperação de senha
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordReset} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  className="pl-10"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setShowResetDialog(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={isResetting}>
+                {isResetting ? 'Enviando...' : 'Enviar Link'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
