@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { MonthFilter } from '@/components/MonthFilter';
 import { ReceiptScanner } from '@/components/ReceiptScanner';
-import { Plus, Trash2, TrendingDown, Check, FileImage } from 'lucide-react';
+import { Plus, Trash2, TrendingDown, Check, FileImage, Pencil } from 'lucide-react';
+import type { Gasto } from '@/types/finance';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -22,6 +23,7 @@ export function Gastos() {
   const { getGastosFiltrados, addGasto, deleteGasto, updateGasto, getCategoriasGasto } = useFinance();
   const categoriasGasto = getCategoriasGasto();
   const [open, setOpen] = useState(false);
+  const [editingGasto, setEditingGasto] = useState<Gasto | null>(null);
   const [form, setForm] = useState({
     data: new Date().toISOString().split('T')[0],
     descricao: '',
@@ -35,21 +37,64 @@ export function Gastos() {
   const total = gastosFiltrados.reduce((sum, g) => sum + g.valor, 0);
   const totalPago = gastosFiltrados.filter(g => g.pago).reduce((sum, g) => sum + g.valor, 0);
 
+  const resetForm = () => {
+    setForm({
+      data: new Date().toISOString().split('T')[0],
+      descricao: '',
+      valor: '',
+      categoria: 'Alimentação',
+      responsavel: 'William',
+      pago: true,
+    });
+    setEditingGasto(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.descricao || !form.valor) return;
 
-    addGasto({
-      data: form.data,
-      descricao: form.descricao,
-      valor: parseFloat(form.valor),
-      categoria: form.categoria,
-      responsavel: form.responsavel,
-      pago: form.pago,
-    });
+    if (editingGasto) {
+      updateGasto(editingGasto.id, {
+        data: form.data,
+        descricao: form.descricao,
+        valor: parseFloat(form.valor),
+        categoria: form.categoria,
+        responsavel: form.responsavel,
+        pago: form.pago,
+      });
+    } else {
+      addGasto({
+        data: form.data,
+        descricao: form.descricao,
+        valor: parseFloat(form.valor),
+        categoria: form.categoria,
+        responsavel: form.responsavel,
+        pago: form.pago,
+      });
+    }
 
-    setForm({ data: new Date().toISOString().split('T')[0], descricao: '', valor: '', categoria: 'Alimentação', responsavel: 'William', pago: true });
+    resetForm();
     setOpen(false);
+  };
+
+  const handleEdit = (gasto: Gasto) => {
+    setEditingGasto(gasto);
+    setForm({
+      data: gasto.data,
+      descricao: gasto.descricao,
+      valor: gasto.valor.toString(),
+      categoria: gasto.categoria,
+      responsavel: gasto.responsavel,
+      pago: gasto.pago,
+    });
+    setOpen(true);
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      resetForm();
+    }
   };
 
   return (
@@ -70,7 +115,7 @@ export function Gastos() {
       </Card>
 
       <div className="flex gap-2">
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <Button className="flex-1 h-12 text-base font-semibold expense-gradient hover:opacity-90 text-expense-foreground shadow-card">
               <Plus className="w-5 h-5 mr-2" />
@@ -81,7 +126,7 @@ export function Gastos() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <TrendingDown className="w-5 h-5 text-expense" />
-                Adicionar Gasto
+                {editingGasto ? 'Editar Gasto' : 'Adicionar Gasto'}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,7 +165,9 @@ export function Gastos() {
                 <Checkbox id="pago" checked={form.pago} onCheckedChange={(checked) => setForm({ ...form, pago: !!checked })} />
                 <Label htmlFor="pago" className="text-sm">Já foi pago</Label>
               </div>
-              <Button type="submit" className="w-full expense-gradient text-expense-foreground">Adicionar</Button>
+              <Button type="submit" className="w-full expense-gradient text-expense-foreground">
+                {editingGasto ? 'Salvar Alterações' : 'Adicionar'}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -173,6 +220,9 @@ export function Gastos() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`font-bold text-expense ${gasto.pago ? 'opacity-60' : ''}`}>{formatCurrency(gasto.valor)}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleEdit(gasto)}>
+                      <Pencil className="w-4 h-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteGasto(gasto.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>

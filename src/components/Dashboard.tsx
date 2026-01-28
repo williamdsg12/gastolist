@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Wallet, AlertCircle } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { MonthFilter } from '@/components/MonthFilter';
+import { RelatorioMensal } from '@/components/RelatorioMensal';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -49,7 +50,10 @@ export function Dashboard() {
 
   return (
     <div className="space-y-4 pb-4">
-      <MonthFilter />
+      <div className="flex items-center justify-between gap-2">
+        <MonthFilter />
+        <RelatorioMensal />
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
