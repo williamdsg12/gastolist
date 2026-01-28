@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MonthFilter } from '@/components/MonthFilter';
 import { ReceiptScanner } from '@/components/ReceiptScanner';
-import { Plus, Trash2, TrendingUp, FileImage } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, FileImage, Pencil } from 'lucide-react';
+import type { Entrada } from '@/types/finance';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -18,9 +19,10 @@ const formatCurrency = (value: number) => {
 };
 
 export function Entradas() {
-  const { getEntradasFiltradas, addEntrada, deleteEntrada, getCategoriasEntrada } = useFinance();
+  const { getEntradasFiltradas, addEntrada, deleteEntrada, updateEntrada, getCategoriasEntrada } = useFinance();
   const categoriasEntrada = getCategoriasEntrada();
   const [open, setOpen] = useState(false);
+  const [editingEntrada, setEditingEntrada] = useState<Entrada | null>(null);
   const [form, setForm] = useState({
     data: new Date().toISOString().split('T')[0],
     descricao: '',
@@ -32,18 +34,7 @@ export function Entradas() {
   const entradasFiltradas = getEntradasFiltradas();
   const total = entradasFiltradas.reduce((sum, e) => sum + e.valor, 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.descricao || !form.valor) return;
-
-    addEntrada({
-      data: form.data,
-      descricao: form.descricao,
-      valor: parseFloat(form.valor),
-      categoria: form.categoria,
-      responsavel: form.responsavel,
-    });
-
+  const resetForm = () => {
     setForm({
       data: new Date().toISOString().split('T')[0],
       descricao: '',
@@ -51,7 +42,52 @@ export function Entradas() {
       categoria: 'Salário',
       responsavel: 'William',
     });
+    setEditingEntrada(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.descricao || !form.valor) return;
+
+    if (editingEntrada) {
+      updateEntrada(editingEntrada.id, {
+        data: form.data,
+        descricao: form.descricao,
+        valor: parseFloat(form.valor),
+        categoria: form.categoria,
+        responsavel: form.responsavel,
+      });
+    } else {
+      addEntrada({
+        data: form.data,
+        descricao: form.descricao,
+        valor: parseFloat(form.valor),
+        categoria: form.categoria,
+        responsavel: form.responsavel,
+      });
+    }
+
+    resetForm();
     setOpen(false);
+  };
+
+  const handleEdit = (entrada: Entrada) => {
+    setEditingEntrada(entrada);
+    setForm({
+      data: entrada.data,
+      descricao: entrada.descricao,
+      valor: entrada.valor.toString(),
+      categoria: entrada.categoria,
+      responsavel: entrada.responsavel,
+    });
+    setOpen(true);
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      resetForm();
+    }
   };
 
   return (
@@ -71,7 +107,7 @@ export function Entradas() {
       </Card>
 
       <div className="flex gap-2">
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <Button className="flex-1 h-12 text-base font-semibold income-gradient hover:opacity-90 text-income-foreground shadow-card">
               <Plus className="w-5 h-5 mr-2" />
@@ -82,7 +118,7 @@ export function Entradas() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-income" />
-                Adicionar Entrada
+                {editingEntrada ? 'Editar Entrada' : 'Adicionar Entrada'}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -117,7 +153,9 @@ export function Entradas() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full income-gradient text-income-foreground">Adicionar</Button>
+              <Button type="submit" className="w-full income-gradient text-income-foreground">
+                {editingEntrada ? 'Salvar Alterações' : 'Adicionar'}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -164,6 +202,9 @@ export function Entradas() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-income">{formatCurrency(entrada.valor)}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleEdit(entrada)}>
+                      <Pencil className="w-4 h-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteEntrada(entrada.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
