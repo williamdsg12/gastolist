@@ -17,7 +17,8 @@ import { SplashScreen } from '@/components/SplashScreen';
 import { AuthScreen } from '@/components/AuthScreen';
 import { WidgetResumo } from '@/components/WidgetResumo';
 import { ListaCompras } from '@/components/ListaCompras';
-import { Wallet, Settings, Receipt, User, Calendar, LogOut } from 'lucide-react';
+import { ConfeitariaLayout } from '@/components/confeitaria/ConfeitariaLayout';
+import { Wallet, Settings, Receipt, User, Calendar, LogOut, ChefHat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { Tab } from '@/components/BottomNav';
@@ -38,6 +39,7 @@ function AppContent() {
   const { user, isLoading, signOut } = useFinance();
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
+  const [mode, setMode] = useState<'pessoal' | 'confeitaria'>('pessoal');
 
   useEffect(() => {
     const hasSeenSplash = sessionStorage.getItem('finance-splash-seen');
@@ -51,9 +53,7 @@ function AppContent() {
     setShowSplash(false);
   };
 
-  const handleAuth = () => {
-    // Auth is handled by the context
-  };
+  const handleAuth = () => {};
 
   if (showSplash) {
     return <SplashScreen onComplete={handleSplashComplete} />;
@@ -73,6 +73,10 @@ function AppContent() {
     return <AuthScreen onAuth={handleAuth} />;
   }
 
+  if (mode === 'confeitaria') {
+    return <ConfeitariaLayout onBack={() => setMode('pessoal')} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -89,6 +93,15 @@ function AppContent() {
               </div>
             </div>
             <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground"
+                onClick={() => setMode('confeitaria')}
+                title="Confeitaria"
+              >
+                <ChefHat className="w-5 h-5" />
+              </Button>
               <Notificacoes />
               <Sheet>
                 <SheetTrigger asChild>

@@ -119,6 +119,122 @@ export type Database = {
         }
         Relationships: []
       }
+      estoque: {
+        Row: {
+          categoria: string
+          created_at: string
+          custo_medio: number
+          estoque_minimo: number
+          id: string
+          nome: string
+          quantidade: number
+          unidade: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          categoria?: string
+          created_at?: string
+          custo_medio?: number
+          estoque_minimo?: number
+          id?: string
+          nome: string
+          quantidade?: number
+          unidade?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          custo_medio?: number
+          estoque_minimo?: number
+          id?: string
+          nome?: string
+          quantidade?: number
+          unidade?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      financeiro_confeitaria: {
+        Row: {
+          categoria: string
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          nota_fiscal_id: string | null
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          data?: string
+          descricao: string
+          id?: string
+          nota_fiscal_id?: string | null
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          nota_fiscal_id?: string | null
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financeiro_confeitaria_nota_fiscal_id_fkey"
+            columns: ["nota_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "notas_fiscais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fornecedores: {
+        Row: {
+          cnpj: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          user_id: string
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          user_id: string
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       gastos: {
         Row: {
           categoria: string
@@ -157,6 +273,105 @@ export type Database = {
           valor?: number
         }
         Relationships: []
+      }
+      ingredientes_receita: {
+        Row: {
+          created_at: string
+          estoque_id: string
+          id: string
+          quantidade: number
+          receita_id: string
+          unidade: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          estoque_id: string
+          id?: string
+          quantidade: number
+          receita_id: string
+          unidade: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          estoque_id?: string
+          id?: string
+          quantidade?: number
+          receita_id?: string
+          unidade?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingredientes_receita_estoque_id_fkey"
+            columns: ["estoque_id"]
+            isOneToOne: false
+            referencedRelation: "estoque"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ingredientes_receita_receita_id_fkey"
+            columns: ["receita_id"]
+            isOneToOne: false
+            referencedRelation: "receitas_confeitaria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      itens_nota_fiscal: {
+        Row: {
+          created_at: string
+          estoque_id: string | null
+          id: string
+          nome_produto: string
+          nota_fiscal_id: string
+          quantidade: number
+          status: string
+          user_id: string
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          created_at?: string
+          estoque_id?: string | null
+          id?: string
+          nome_produto: string
+          nota_fiscal_id: string
+          quantidade: number
+          status?: string
+          user_id: string
+          valor_total: number
+          valor_unitario: number
+        }
+        Update: {
+          created_at?: string
+          estoque_id?: string | null
+          id?: string
+          nome_produto?: string
+          nota_fiscal_id?: string
+          quantidade?: number
+          status?: string
+          user_id?: string
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_nota_fiscal_estoque_id_fkey"
+            columns: ["estoque_id"]
+            isOneToOne: false
+            referencedRelation: "estoque"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_nota_fiscal_nota_fiscal_id_fkey"
+            columns: ["nota_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "notas_fiscais"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lista_compras: {
         Row: {
@@ -242,6 +457,164 @@ export type Database = {
         }
         Relationships: []
       }
+      movimentacao_estoque: {
+        Row: {
+          created_at: string
+          custo_unitario: number | null
+          data: string
+          estoque_id: string
+          fornecedor_id: string | null
+          id: string
+          nota_fiscal_id: string | null
+          observacao: string | null
+          quantidade: number
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custo_unitario?: number | null
+          data?: string
+          estoque_id: string
+          fornecedor_id?: string | null
+          id?: string
+          nota_fiscal_id?: string | null
+          observacao?: string | null
+          quantidade: number
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custo_unitario?: number | null
+          data?: string
+          estoque_id?: string
+          fornecedor_id?: string | null
+          id?: string
+          nota_fiscal_id?: string | null
+          observacao?: string | null
+          quantidade?: number
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimentacao_estoque_estoque_id_fkey"
+            columns: ["estoque_id"]
+            isOneToOne: false
+            referencedRelation: "estoque"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimentacao_estoque_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimentacao_nota_fk"
+            columns: ["nota_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "notas_fiscais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notas_fiscais: {
+        Row: {
+          cnpj_emitente: string | null
+          created_at: string
+          data_emissao: string | null
+          fornecedor_id: string | null
+          id: string
+          imagem_url: string | null
+          nome_emitente: string | null
+          numero: string | null
+          status: string
+          user_id: string
+          valor_total: number
+        }
+        Insert: {
+          cnpj_emitente?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome_emitente?: string | null
+          numero?: string | null
+          status?: string
+          user_id: string
+          valor_total?: number
+        }
+        Update: {
+          cnpj_emitente?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome_emitente?: string | null
+          numero?: string | null
+          status?: string
+          user_id?: string
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notas_fiscais_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos_venda: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          custo_total: number
+          id: string
+          margem_lucro: number
+          nome: string
+          preco_venda: number
+          receita_id: string | null
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          custo_total?: number
+          id?: string
+          margem_lucro?: number
+          nome: string
+          preco_venda?: number
+          receita_id?: string | null
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          custo_total?: number
+          id?: string
+          margem_lucro?: number
+          nome?: string
+          preco_venda?: number
+          receita_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_venda_receita_id_fkey"
+            columns: ["receita_id"]
+            isOneToOne: false
+            referencedRelation: "receitas_confeitaria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -262,6 +635,39 @@ export type Database = {
           id?: string
           nome?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      receitas_confeitaria: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          rendimento: number
+          tempo_preparo: string | null
+          unidade_rendimento: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          rendimento?: number
+          tempo_preparo?: string | null
+          unidade_rendimento?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          rendimento?: number
+          tempo_preparo?: string | null
+          unidade_rendimento?: string
           user_id?: string
         }
         Relationships: []
