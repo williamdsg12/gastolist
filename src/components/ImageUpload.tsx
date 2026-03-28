@@ -43,11 +43,12 @@ export function ImageUpload({ value, onChange, folder = 'products', className }:
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data } = await supabase.storage
         .from('images')
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 3600);
 
-      onChange(publicUrl);
+      if (!data?.signedUrl) throw new Error('Failed to get signed URL');
+      onChange(data.signedUrl);
       toast.success('Imagem enviada!');
     } catch (error) {
       console.error('Upload error:', error);

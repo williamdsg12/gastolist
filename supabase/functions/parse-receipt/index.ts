@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,11 +12,44 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, tipo } = await req.json();
+    // Auth check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-    if (!imageBase64) {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const body = await req.json();
+    const { imageBase64, tipo } = body;
+
+    if (!imageBase64 || typeof imageBase64 !== "string") {
       return new Response(
         JSON.stringify({ error: "Imagem não fornecida" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Limit payload size (~10MB base64)
+    if (imageBase64.length > 10 * 1024 * 1024) {
+      return new Response(
+        JSON.stringify({ error: "Imagem muito grande (máx. 10MB)" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -87,8 +121,7 @@ Responda APENAS em JSON válido, sem markdown, no formato:
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("AI gateway error:", response.status);
       return new Response(
         JSON.stringify({ error: "Erro ao processar imagem" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -98,10 +131,8 @@ Responda APENAS em JSON válido, sem markdown, no formato:
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    // Parse the JSON from the response
     let parsedData;
     try {
-      // Try to extract JSON from the response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         parsedData = JSON.parse(jsonMatch[0]);
@@ -109,7 +140,7 @@ Responda APENAS em JSON válido, sem markdown, no formato:
         throw new Error("No JSON found in response");
       }
     } catch (parseError) {
-      console.error("Failed to parse AI response:", content);
+      console.error("Failed to parse AI response");
       return new Response(
         JSON.stringify({ error: "Não foi possível extrair dados do comprovante" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -123,7 +154,7 @@ Responda APENAS em JSON válido, sem markdown, no formato:
   } catch (error) {
     console.error("parse-receipt error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro ao processar requisição" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
