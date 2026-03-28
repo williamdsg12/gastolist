@@ -10,6 +10,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Settings, Download, Upload, Trash2, FileDown, Shield, Palette, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
+const PIN_HASH_KEY = 'finance-pin-hash';
+const LEGACY_PIN_KEY = 'finance-pin';
+
+const hashPin = async (pin: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin + 'finance-app-salt-v1');
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+};
+
 export function Configuracoes() {
   const { entradas, gastos, contas } = useFinance();
   const { theme } = useTheme();
@@ -89,7 +101,7 @@ export function Configuracoes() {
     window.location.reload();
   };
 
-  const handleSetPin = () => {
+  const handleSetPin = async () => {
     if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
       toast.error('O PIN deve ter 4 dígitos');
       return;
@@ -98,7 +110,9 @@ export function Configuracoes() {
       toast.error('Os PINs não coincidem');
       return;
     }
-    localStorage.setItem('finance-pin', pin);
+    const hash = await hashPin(pin);
+    localStorage.setItem(PIN_HASH_KEY, hash);
+    localStorage.removeItem(LEGACY_PIN_KEY);
     toast.success('PIN configurado com sucesso!');
     setPinDialogOpen(false);
     setPin('');
@@ -106,11 +120,12 @@ export function Configuracoes() {
   };
 
   const removePin = () => {
-    localStorage.removeItem('finance-pin');
+    localStorage.removeItem(PIN_HASH_KEY);
+    localStorage.removeItem(LEGACY_PIN_KEY);
     toast.success('PIN removido');
   };
 
-  const hasPin = !!localStorage.getItem('finance-pin');
+  const hasPin = !!localStorage.getItem(PIN_HASH_KEY) || !!localStorage.getItem(LEGACY_PIN_KEY);
 
   return (
     <div className="space-y-4 pb-4">
