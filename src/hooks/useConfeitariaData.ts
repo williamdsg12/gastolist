@@ -125,15 +125,15 @@ export function useConfeitariaData() {
     setLoading(true);
     try {
       const [forn, est, mov, nf, inNf, rec, ing, prod, fin] = await Promise.all([
-        supabase.from('fornecedores').select('*').eq('user_id', userId).order('nome'),
-        supabase.from('estoque').select('*').eq('user_id', userId).order('nome'),
-        supabase.from('movimentacao_estoque').select('*').eq('user_id', userId).order('data', { ascending: false }),
-        supabase.from('notas_fiscais').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-        supabase.from('itens_nota_fiscal').select('*').eq('user_id', userId),
-        supabase.from('receitas_confeitaria').select('*').eq('user_id', userId).order('nome'),
-        supabase.from('ingredientes_receita').select('*').eq('user_id', userId),
-        supabase.from('produtos_venda').select('*').eq('user_id', userId).order('nome'),
-        supabase.from('financeiro_confeitaria').select('*').eq('user_id', userId).order('data', { ascending: false }),
+        supabase.from('fornecedores').select('*').order('nome'),
+        supabase.from('estoque').select('*').order('nome'),
+        supabase.from('movimentacao_estoque').select('*').order('data', { ascending: false }),
+        supabase.from('notas_fiscais').select('*').order('created_at', { ascending: false }),
+        supabase.from('itens_nota_fiscal').select('*'),
+        supabase.from('receitas_confeitaria').select('*').order('nome'),
+        supabase.from('ingredientes_receita').select('*'),
+        supabase.from('produtos_venda').select('*').order('nome'),
+        supabase.from('financeiro_confeitaria').select('*').order('data', { ascending: false }),
       ]);
 
       if (forn.data) setFornecedores(forn.data as any);
