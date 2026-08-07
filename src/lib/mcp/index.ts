@@ -26,8 +26,12 @@ export default defineMcp({
     resumoMensalTool,
     listGastosTool,
     addGastoTool,
+    updateGastoTool,
+    deleteGastoTool,
     listEntradasTool,
     addEntradaTool,
+    updateEntradaTool,
+    deleteEntradaTool,
     listContasTool,
   ],
 });
