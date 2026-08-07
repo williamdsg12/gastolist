@@ -1,10 +1,14 @@
 import { auth, defineMcp } from "@lovable.dev/mcp-js";
 import addEntradaTool from "./tools/add-entrada";
 import addGastoTool from "./tools/add-gasto";
+import deleteEntradaTool from "./tools/delete-entrada";
+import deleteGastoTool from "./tools/delete-gasto";
 import listContasTool from "./tools/list-contas";
 import listEntradasTool from "./tools/list-entradas";
 import listGastosTool from "./tools/list-gastos";
 import resumoMensalTool from "./tools/resumo-mensal";
+import updateEntradaTool from "./tools/update-entrada";
+import updateGastoTool from "./tools/update-gasto";
 
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
@@ -22,8 +26,12 @@ export default defineMcp({
     resumoMensalTool,
     listGastosTool,
     addGastoTool,
+    updateGastoTool,
+    deleteGastoTool,
     listEntradasTool,
     addEntradaTool,
+    updateEntradaTool,
+    deleteEntradaTool,
     listContasTool,
   ],
 });

@@ -125,6 +125,85 @@
         "outputSchema": null
       },
       {
+        "name": "update_gasto",
+        "title": "Editar gasto",
+        "description": "Update an existing expense (gasto) belonging to the signed-in user. Only the provided fields are changed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "ID of the expense to update."
+            },
+            "descricao": {
+              "type": "string",
+              "description": "New description."
+            },
+            "valor": {
+              "type": "number",
+              "description": "New amount in BRL."
+            },
+            "categoria": {
+              "type": "string",
+              "description": "New category."
+            },
+            "responsavel": {
+              "type": "string",
+              "description": "New person responsible, e.g. \"William\" or \"Andressa\"."
+            },
+            "data": {
+              "type": "string",
+              "description": "New date as YYYY-MM-DD."
+            },
+            "mes": {
+              "type": "string",
+              "description": "New month name in Portuguese."
+            },
+            "pago": {
+              "type": "boolean",
+              "description": "Whether it is paid."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "delete_gasto",
+        "title": "Excluir gasto",
+        "description": "Permanently delete an expense (gasto) belonging to the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "ID of the expense to delete."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
         "name": "list_entradas",
         "title": "Listar entradas",
         "description": "List the signed-in user's income entries (entradas) for a month.",
@@ -196,6 +275,81 @@
             "valor",
             "categoria",
             "responsavel"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_entrada",
+        "title": "Editar entrada",
+        "description": "Update an existing income entry (entrada) belonging to the signed-in user. Only the provided fields are changed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "ID of the income entry to update."
+            },
+            "descricao": {
+              "type": "string",
+              "description": "New description."
+            },
+            "valor": {
+              "type": "number",
+              "description": "New amount in BRL."
+            },
+            "categoria": {
+              "type": "string",
+              "description": "New category."
+            },
+            "responsavel": {
+              "type": "string",
+              "description": "New person responsible, e.g. \"William\" or \"Andressa\"."
+            },
+            "data": {
+              "type": "string",
+              "description": "New date as YYYY-MM-DD."
+            },
+            "mes": {
+              "type": "string",
+              "description": "New month name in Portuguese."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "delete_entrada",
+        "title": "Excluir entrada",
+        "description": "Permanently delete an income entry (entrada) belonging to the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "ID of the income entry to delete."
+            }
+          },
+          "required": [
+            "id"
           ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"

@@ -155,16 +155,58 @@ var add_gasto_default = defineTool2({
   }
 });
 
-// src/lib/mcp/tools/list-contas.ts
+// src/lib/mcp/tools/delete-entrada.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.26.1";
 import { z as z3 } from "npm:zod@^3.25.76";
-var list_contas_default = defineTool3({
+var delete_entrada_default = defineTool3({
+  name: "delete_entrada",
+  title: "Excluir entrada",
+  description: "Permanently delete an income entry (entrada) belonging to the signed-in user.",
+  inputSchema: {
+    id: z3.string().describe("ID of the income entry to delete.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ id }, ctx) => {
+    if (!ctx.isAuthenticated()) return fail("Not authenticated");
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("entradas").delete().eq("id", id).eq("user_id", ctx.getUserId()).select().maybeSingle();
+    if (error) return fail(error.message);
+    if (!data) return fail("Entrada not found for this user.");
+    return ok({ deleted: true, entrada: data });
+  }
+});
+
+// src/lib/mcp/tools/delete-gasto.ts
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z4 } from "npm:zod@^3.25.76";
+var delete_gasto_default = defineTool4({
+  name: "delete_gasto",
+  title: "Excluir gasto",
+  description: "Permanently delete an expense (gasto) belonging to the signed-in user.",
+  inputSchema: {
+    id: z4.string().describe("ID of the expense to delete.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ id }, ctx) => {
+    if (!ctx.isAuthenticated()) return fail("Not authenticated");
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("gastos").delete().eq("id", id).eq("user_id", ctx.getUserId()).select().maybeSingle();
+    if (error) return fail(error.message);
+    if (!data) return fail("Gasto not found for this user.");
+    return ok({ deleted: true, gasto: data });
+  }
+});
+
+// src/lib/mcp/tools/list-contas.ts
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z5 } from "npm:zod@^3.25.76";
+var list_contas_default = defineTool5({
   name: "list_contas",
   title: "Listar contas",
   description: "List the signed-in user's bills (contas) for a month, with paid/pending status.",
   inputSchema: {
-    mes: z3.string().optional().describe("Month name in Portuguese. Defaults to the current month."),
-    apenas_pendentes: z3.boolean().optional().describe("Return only unpaid bills.")
+    mes: z5.string().optional().describe("Month name in Portuguese. Defaults to the current month."),
+    apenas_pendentes: z5.boolean().optional().describe("Return only unpaid bills.")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ mes, apenas_pendentes }, ctx) => {
@@ -181,16 +223,16 @@ var list_contas_default = defineTool3({
 });
 
 // src/lib/mcp/tools/list-entradas.ts
-import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.26.1";
-import { z as z4 } from "npm:zod@^3.25.76";
-var list_entradas_default = defineTool4({
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z6 } from "npm:zod@^3.25.76";
+var list_entradas_default = defineTool6({
   name: "list_entradas",
   title: "Listar entradas",
   description: "List the signed-in user's income entries (entradas) for a month.",
   inputSchema: {
-    mes: z4.string().optional().describe('Month name in Portuguese, e.g. "Agosto". Defaults to the current month.'),
-    responsavel: z4.string().optional().describe("Person responsible filter."),
-    limit: z4.number().optional().describe("Maximum rows to return (default 50).")
+    mes: z6.string().optional().describe('Month name in Portuguese, e.g. "Agosto". Defaults to the current month.'),
+    responsavel: z6.string().optional().describe("Person responsible filter."),
+    limit: z6.number().optional().describe("Maximum rows to return (default 50).")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ mes, responsavel, limit }, ctx) => {
@@ -206,17 +248,17 @@ var list_entradas_default = defineTool4({
 });
 
 // src/lib/mcp/tools/list-gastos.ts
-import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.1";
-import { z as z5 } from "npm:zod@^3.25.76";
-var list_gastos_default = defineTool5({
+import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z7 } from "npm:zod@^3.25.76";
+var list_gastos_default = defineTool7({
   name: "list_gastos",
   title: "Listar gastos",
   description: "List the signed-in user's expenses (gastos) for a month, optionally filtered by person or category.",
   inputSchema: {
-    mes: z5.string().optional().describe('Month name in Portuguese, e.g. "Agosto". Defaults to the current month.'),
-    responsavel: z5.string().optional().describe('Person responsible, e.g. "William" or "Andressa".'),
-    categoria: z5.string().optional().describe("Expense category filter."),
-    limit: z5.number().optional().describe("Maximum rows to return (default 50).")
+    mes: z7.string().optional().describe('Month name in Portuguese, e.g. "Agosto". Defaults to the current month.'),
+    responsavel: z7.string().optional().describe('Person responsible, e.g. "William" or "Andressa".'),
+    categoria: z7.string().optional().describe("Expense category filter."),
+    limit: z7.number().optional().describe("Maximum rows to return (default 50).")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ mes, responsavel, categoria, limit }, ctx) => {
@@ -233,14 +275,14 @@ var list_gastos_default = defineTool5({
 });
 
 // src/lib/mcp/tools/resumo-mensal.ts
-import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.26.1";
-import { z as z6 } from "npm:zod@^3.25.76";
-var resumo_mensal_default = defineTool6({
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z8 } from "npm:zod@^3.25.76";
+var resumo_mensal_default = defineTool8({
   name: "resumo_mensal",
   title: "Resumo mensal",
   description: "Monthly financial summary for the signed-in user: total income, total expenses, balance, bills paid and pending, and expenses by category.",
   inputSchema: {
-    mes: z6.string().optional().describe('Month name in Portuguese, e.g. "Agosto". Defaults to the current month.')
+    mes: z8.string().optional().describe('Month name in Portuguese, e.g. "Agosto". Defaults to the current month.')
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ mes }, ctx) => {
@@ -276,6 +318,69 @@ var resumo_mensal_default = defineTool6({
   }
 });
 
+// src/lib/mcp/tools/update-entrada.ts
+import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z9 } from "npm:zod@^3.25.76";
+var update_entrada_default = defineTool9({
+  name: "update_entrada",
+  title: "Editar entrada",
+  description: "Update an existing income entry (entrada) belonging to the signed-in user. Only the provided fields are changed.",
+  inputSchema: {
+    id: z9.string().describe("ID of the income entry to update."),
+    descricao: z9.string().optional().describe("New description."),
+    valor: z9.number().optional().describe("New amount in BRL."),
+    categoria: z9.string().optional().describe("New category."),
+    responsavel: z9.string().optional().describe('New person responsible, e.g. "William" or "Andressa".'),
+    data: z9.string().optional().describe("New date as YYYY-MM-DD."),
+    mes: z9.string().optional().describe("New month name in Portuguese.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+  handler: async ({ id, ...fields }, ctx) => {
+    if (!ctx.isAuthenticated()) return fail("Not authenticated");
+    const patch = Object.fromEntries(
+      Object.entries(fields).filter(([, v]) => v !== void 0)
+    );
+    if (Object.keys(patch).length === 0) return fail("Nothing to update: provide at least one field.");
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("entradas").update(patch).eq("id", id).eq("user_id", ctx.getUserId()).select().maybeSingle();
+    if (error) return fail(error.message);
+    if (!data) return fail("Entrada not found for this user.");
+    return ok({ entrada: data });
+  }
+});
+
+// src/lib/mcp/tools/update-gasto.ts
+import { defineTool as defineTool10 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z10 } from "npm:zod@^3.25.76";
+var update_gasto_default = defineTool10({
+  name: "update_gasto",
+  title: "Editar gasto",
+  description: "Update an existing expense (gasto) belonging to the signed-in user. Only the provided fields are changed.",
+  inputSchema: {
+    id: z10.string().describe("ID of the expense to update."),
+    descricao: z10.string().optional().describe("New description."),
+    valor: z10.number().optional().describe("New amount in BRL."),
+    categoria: z10.string().optional().describe("New category."),
+    responsavel: z10.string().optional().describe('New person responsible, e.g. "William" or "Andressa".'),
+    data: z10.string().optional().describe("New date as YYYY-MM-DD."),
+    mes: z10.string().optional().describe("New month name in Portuguese."),
+    pago: z10.boolean().optional().describe("Whether it is paid.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+  handler: async ({ id, ...fields }, ctx) => {
+    if (!ctx.isAuthenticated()) return fail("Not authenticated");
+    const patch = Object.fromEntries(
+      Object.entries(fields).filter(([, v]) => v !== void 0)
+    );
+    if (Object.keys(patch).length === 0) return fail("Nothing to update: provide at least one field.");
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("gastos").update(patch).eq("id", id).eq("user_id", ctx.getUserId()).select().maybeSingle();
+    if (error) return fail(error.message);
+    if (!data) return fail("Gasto not found for this user.");
+    return ok({ gasto: data });
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "zfzrajozjxcmktzsypon";
 var mcp_default = defineMcp({
@@ -291,8 +396,12 @@ var mcp_default = defineMcp({
     resumo_mensal_default,
     list_gastos_default,
     add_gasto_default,
+    update_gasto_default,
+    delete_gasto_default,
     list_entradas_default,
     add_entrada_default,
+    update_entrada_default,
+    delete_entrada_default,
     list_contas_default
   ]
 });
