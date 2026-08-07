@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://zfzrajozjxcmktzsypon.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "family-finances",
+      "version": "0.1.0",
+      "title": "Family Finances"
+    },
+    "tools": [
+      {
+        "name": "resumo_mensal",
+        "title": "Resumo mensal",
+        "description": "Monthly financial summary for the signed-in user: total income, total expenses, balance, bills paid and pending, and expenses by category.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mes": {
+              "type": "string",
+              "description": "Month name in Portuguese, e.g. \"Agosto\". Defaults to the current month."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_gastos",
+        "title": "Listar gastos",
+        "description": "List the signed-in user's expenses (gastos) for a month, optionally filtered by person or category.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mes": {
+              "type": "string",
+              "description": "Month name in Portuguese, e.g. \"Agosto\". Defaults to the current month."
+            },
+            "responsavel": {
+              "type": "string",
+              "description": "Person responsible, e.g. \"William\" or \"Andressa\"."
+            },
+            "categoria": {
+              "type": "string",
+              "description": "Expense category filter."
+            },
+            "limit": {
+              "type": "number",
+              "description": "Maximum rows to return (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_gasto",
+        "title": "Registrar gasto",
+        "description": "Record a new expense (gasto) for the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "descricao": {
+              "type": "string",
+              "description": "What the expense was for."
+            },
+            "valor": {
+              "type": "number",
+              "description": "Amount in BRL."
+            },
+            "categoria": {
+              "type": "string",
+              "description": "Category, e.g. \"Alimentação\", \"Transporte\", \"Moradia\", \"Outros\"."
+            },
+            "responsavel": {
+              "type": "string",
+              "description": "Person responsible, e.g. \"William\" or \"Andressa\"."
+            },
+            "data": {
+              "type": "string",
+              "description": "Date as YYYY-MM-DD. Defaults to today."
+            },
+            "mes": {
+              "type": "string",
+              "description": "Month name in Portuguese. Defaults to the current month."
+            },
+            "pago": {
+              "type": "boolean",
+              "description": "Whether it is already paid. Defaults to true."
+            }
+          },
+          "required": [
+            "descricao",
+            "valor",
+            "categoria",
+            "responsavel"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_entradas",
+        "title": "Listar entradas",
+        "description": "List the signed-in user's income entries (entradas) for a month.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mes": {
+              "type": "string",
+              "description": "Month name in Portuguese, e.g. \"Agosto\". Defaults to the current month."
+            },
+            "responsavel": {
+              "type": "string",
+              "description": "Person responsible filter."
+            },
+            "limit": {
+              "type": "number",
+              "description": "Maximum rows to return (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_entrada",
+        "title": "Registrar entrada",
+        "description": "Record a new income entry (entrada) for the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "descricao": {
+              "type": "string",
+              "description": "Description of the income."
+            },
+            "valor": {
+              "type": "number",
+              "description": "Amount in BRL."
+            },
+            "categoria": {
+              "type": "string",
+              "description": "Category, e.g. \"Salário\", \"Freelance\", \"Investimentos\", \"Outros\"."
+            },
+            "responsavel": {
+              "type": "string",
+              "description": "Person responsible, e.g. \"William\" or \"Andressa\"."
+            },
+            "data": {
+              "type": "string",
+              "description": "Date as YYYY-MM-DD. Defaults to today."
+            },
+            "mes": {
+              "type": "string",
+              "description": "Month name in Portuguese. Defaults to the current month."
+            }
+          },
+          "required": [
+            "descricao",
+            "valor",
+            "categoria",
+            "responsavel"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_contas",
+        "title": "Listar contas",
+        "description": "List the signed-in user's bills (contas) for a month, with paid/pending status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mes": {
+              "type": "string",
+              "description": "Month name in Portuguese. Defaults to the current month."
+            },
+            "apenas_pendentes": {
+              "type": "boolean",
+              "description": "Return only unpaid bills."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
