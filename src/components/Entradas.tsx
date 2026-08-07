@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFinance } from '@/contexts/FinanceContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MonthFilter } from '@/components/MonthFilter';
 import { ReceiptScanner } from '@/components/ReceiptScanner';
-import { Plus, Trash2, TrendingUp, FileImage, Pencil } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, FileImage, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Entrada } from '@/types/finance';
 
 const formatCurrency = (value: number) => {
@@ -19,10 +19,12 @@ const formatCurrency = (value: number) => {
 };
 
 export function Entradas() {
-  const { getEntradasFiltradas, addEntrada, deleteEntrada, updateEntrada, getCategoriasEntrada } = useFinance();
+  const { getEntradasFiltradas, addEntrada, deleteEntrada, updateEntrada, getCategoriasEntrada, mesSelecionado } = useFinance();
   const categoriasEntrada = getCategoriasEntrada();
   const [open, setOpen] = useState(false);
   const [editingEntrada, setEditingEntrada] = useState<Entrada | null>(null);
+  const [limite, setLimite] = useState<number>(10);
+  const [pagina, setPagina] = useState<number>(1);
   const [form, setForm] = useState({
     data: new Date().toISOString().split('T')[0],
     descricao: '',
@@ -33,6 +35,17 @@ export function Entradas() {
 
   const entradasFiltradas = getEntradasFiltradas();
   const total = entradasFiltradas.reduce((sum, e) => sum + e.valor, 0);
+
+  // Reset page when month or dataset length changes significantly
+  useEffect(() => {
+    setPagina(1);
+  }, [mesSelecionado, limite]);
+
+  const totalEntradas = entradasFiltradas.length;
+  const totalPaginas = Math.max(1, Math.ceil(totalEntradas / limite));
+  const paginaAtual = Math.min(Math.max(1, pagina), totalPaginas);
+  const offset = (paginaAtual - 1) * limite;
+  const entradasPaginadas = entradasFiltradas.slice(offset, offset + limite);
 
   const resetForm = () => {
     setForm({
@@ -176,8 +189,50 @@ export function Entradas() {
         />
       </div>
 
+      {/* Options bar for Limite & Offset/Página */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-sm">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="limite-entradas" className="text-xs text-muted-foreground">Limite por página:</Label>
+          <Select value={limite.toString()} onValueChange={(v) => setLimite(Number(v))}>
+            <SelectTrigger id="limite-entradas" className="h-8 w-[80px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Label htmlFor="offset-entradas" className="text-xs text-muted-foreground">Offset:</Label>
+          <Input 
+            id="offset-entradas" 
+            type="number" 
+            min="0" 
+            className="h-8 w-[70px] text-xs px-2"
+            value={offset} 
+            onChange={(e) => {
+              const off = Math.max(0, parseInt(e.target.value) || 0);
+              const newPage = Math.floor(off / limite) + 1;
+              setPagina(newPage);
+            }} 
+          />
+        </div>
+
+        <div className="text-xs text-muted-foreground">
+          {totalEntradas > 0 ? (
+            <span>{offset + 1}-{Math.min(offset + limite, totalEntradas)} de {totalEntradas}</span>
+          ) : (
+            <span>0 registos</span>
+          )}
+        </div>
+      </div>
+
       <div className="space-y-2">
-        {entradasFiltradas.length === 0 ? (
+        {entradasPaginadas.length === 0 ? (
           <Card className="shadow-card">
             <CardContent className="p-6 text-center text-muted-foreground">
               <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-30" />
@@ -185,7 +240,7 @@ export function Entradas() {
             </CardContent>
           </Card>
         ) : (
-          entradasFiltradas.map((entrada, index) => (
+          entradasPaginadas.map((entrada, index) => (
             <Card key={entrada.id} className="shadow-card animate-fade-in hover:shadow-card-hover transition-shadow" style={{ animationDelay: `${index * 0.05}s` }}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -215,6 +270,48 @@ export function Entradas() {
           ))
         )}
       </div>
+
+      {/* Pagination Navigation */}
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={paginaAtual <= 1}
+            onClick={() => setPagina(p => Math.max(1, p - 1))}
+            className="h-8 text-xs flex items-center gap-1"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Anterior
+          </Button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((p) => (
+              <Button
+                key={p}
+                variant={p === paginaAtual ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPagina(p)}
+                className="h-7 w-7 text-xs p-0"
+              >
+                {p}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={paginaAtual >= totalPaginas}
+            onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+            className="h-8 text-xs flex items-center gap-1"
+          >
+            Próximo
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
+

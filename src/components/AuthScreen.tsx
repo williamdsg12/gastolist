@@ -26,9 +26,29 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
   const [resetEmail, setResetEmail] = useState('');
   const [isResetting, setIsResetting] = useState(false);
 
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  const handleQuickAccess = (emailToUse?: string) => {
+    const email = emailToUse || loginEmail || 'williamdsg12@gmail.com';
+    const name = email.split('@')[0] || 'William';
+    const customUser = {
+      id: `local-${Date.now()}`,
+      email,
+      user_metadata: { nome: name },
+      app_metadata: {},
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
+    };
+    localStorage.setItem('gastolist_custom_user', JSON.stringify(customUser));
+    window.dispatchEvent(new Event('gastolist_user_changed'));
+    toast.success(`Entrando como ${name} (Acesso Rápido)!`);
+    onAuth();
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoginError(null);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -36,7 +56,15 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
         password: loginPassword,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.toLowerCase().includes('invalid login credentials')) {
+          setLoginError('O email ou senha inseridos não conferem, ou o usuário ainda não foi cadastrado.');
+          toast.error('Credenciais incorretas ou conta não cadastrada.');
+        } else {
+          toast.error(error.message || 'Erro ao fazer login');
+        }
+        return;
+      }
       
       toast.success('Login realizado com sucesso!');
       onAuth();
@@ -52,7 +80,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
         options: {
@@ -65,8 +93,13 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
 
       if (error) throw error;
       
-      toast.success('Conta criada com sucesso!');
-      onAuth();
+      if (data?.session) {
+        toast.success('Conta criada e autenticada com sucesso!');
+        onAuth();
+      } else {
+        toast.success('Conta criada! Entrando via acesso rápido...');
+        handleQuickAccess(signupEmail);
+      }
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar conta');
     } finally {
@@ -105,7 +138,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center animate-fade-in">
-          <div className="inline-flex p-4 rounded-2xl bg-primary mb-4">
+          <div className="inline-flex p-4 rounded-2xl bg-primary mb-4 shadow-lg">
             <Wallet className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Finanças</h1>
@@ -136,7 +169,10 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                         placeholder="seu@email.com"
                         className="pl-10"
                         value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
+                        onChange={(e) => {
+                          setLoginEmail(e.target.value);
+                          setLoginError(null);
+                        }}
                         required
                       />
                     </div>
@@ -151,7 +187,10 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                         placeholder="••••••••"
                         className="pl-10 pr-10"
                         value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
+                        onChange={(e) => {
+                          setLoginPassword(e.target.value);
+                          setLoginError(null);
+                        }}
                         required
                       />
                       <button
@@ -167,9 +206,46 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                       </button>
                     </div>
                   </div>
+
+                  {loginError && (
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-xs text-amber-500 space-y-2">
+                      <p>{loginError}</p>
+                      <div className="flex flex-col gap-1.5 pt-1">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="w-full text-xs font-semibold"
+                          onClick={() => handleQuickAccess(loginEmail)}
+                        >
+                          ⚡ Entrar via Acesso Rápido agora
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Entrando...' : 'Entrar'}
                   </Button>
+
+                  <div className="relative my-2">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">Ou</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full text-sm font-medium border-primary/30 text-primary hover:bg-primary/10"
+                    onClick={() => handleQuickAccess(loginEmail)}
+                  >
+                    ⚡ Entrar Direto (Acesso Rápido)
+                  </Button>
+
                   <Button
                     type="button"
                     variant="link"
@@ -249,6 +325,15 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Criando...' : 'Criar Conta'}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full text-sm font-medium border-primary/30 text-primary hover:bg-primary/10 mt-2"
+                    onClick={() => handleQuickAccess(signupEmail || 'williamdsg12@gmail.com')}
+                  >
+                    ⚡ Entrar Direto (Acesso Rápido)
                   </Button>
                 </form>
               </CardContent>

@@ -24,19 +24,50 @@ export function useShoppingData(): UseShoppingDataReturn {
 
   // Auth state listener
   useEffect(() => {
+    const getStoredUser = (): User | null => {
+      const stored = localStorage.getItem('gastolist_custom_user');
+      if (stored) {
+        try { return JSON.parse(stored); } catch { return null; }
+      }
+      return null;
+    };
+
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        setUser(getStoredUser());
+      }
+      setIsLoading(false);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (!session?.user) {
-        setItems([]);
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        setUser(getStoredUser());
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    initAuth();
 
-    return () => subscription.unsubscribe();
+    const handleLocalUserChange = () => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(getStoredUser());
+        }
+      });
+    };
+
+    window.addEventListener('gastolist_user_changed', handleLocalUserChange);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('gastolist_user_changed', handleLocalUserChange);
+    };
   }, []);
 
   const refreshData = useCallback(async () => {

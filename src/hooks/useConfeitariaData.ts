@@ -115,9 +115,26 @@ export function useConfeitariaData() {
       const { data } = await supabase.auth.getUser();
       if (data.user) {
         setUserId(data.user.id);
+      } else {
+        const stored = localStorage.getItem('gastolist_custom_user');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            setUserId(parsed.id || 'local-user');
+          } catch {
+            setUserId(null);
+          }
+        } else {
+          setUserId(null);
+        }
       }
     };
+
     getUser();
+
+    const handleUserChange = () => { getUser(); };
+    window.addEventListener('gastolist_user_changed', handleUserChange);
+    return () => { window.removeEventListener('gastolist_user_changed', handleUserChange); };
   }, []);
 
   const fetchAll = useCallback(async () => {
